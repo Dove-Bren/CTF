@@ -6,6 +6,12 @@ import org.bukkit.Location;
 
 import org.bukkit.entity.Player;
 
+/**
+ * This interface is for containing one CTF team and it's attributes. All these methods must be implemented correctly
+ * for the entire plugin to work.
+ * @author William
+ *
+ */
 public interface CTFTeam {
 	
 	public void setPlayers(List<Player> list);
@@ -21,17 +27,19 @@ public interface CTFTeam {
 	public void addToScore(int increment);
 	public void subToScore(int decrement);
 	
+	//Methods for setting and getting Goal Regions
 	public Region getGoal();
 	public void setgoal(Region goal);
 
+	//Methods for setting and getting Spawn Point
 	public void setSpawn(Location spawnLocation);
 	public Location getSpawn();
 	
+	//Checks to see if a player is in a team
 	public boolean inTeam(Player player);
 	
 	public TeamPlayer getTeamPlayer(Player player);
-	
-	//ADD private Region Goal;
+
 	//ADD public setRespawn();
 	
 	
