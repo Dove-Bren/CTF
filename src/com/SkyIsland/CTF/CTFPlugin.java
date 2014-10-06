@@ -9,7 +9,7 @@ public class CTFPlugin extends JavaPlugin {
 	}
 	
 	public void onEnable() {
-		
+		this.getDataFolder();
 	}
 	
 	public void onDisable() {

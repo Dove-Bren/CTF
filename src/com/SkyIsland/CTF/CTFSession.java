@@ -18,6 +18,29 @@ public interface CTFSession {
 	
 	public void addPlayer(CTFTeam team, Player player);
 	
+	public void removePlayer(CTFTeam team, Player player);
+	
 	public boolean isRunning();
 	
+	public void start();
+	
+	public void stop();
+	
 }
+
+
+/**
+ * session.createTeam("");
+ * 
+ * 
+ * for ("" "") 
+ * 	 session.addPlayer("" "")
+ * 
+ * 
+ * session.start();
+ *
+*
+*
+*
+*
+*/
