@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 
 public interface CTFTeam {
 	
-	
 	public void setPlayers(List<Player> list);
 	
 	public List<Player> getPlayers();
@@ -27,6 +26,10 @@ public interface CTFTeam {
 
 	public void setSpawn(Location spawnLocation);
 	public Location getSpawn();
+	
+	public boolean inTeam(Player player);
+	
+	public TeamPlayer getTeamPlayer(Player player);
 	
 	//ADD private Region Goal;
 	//ADD public setRespawn();
