@@ -28,8 +28,8 @@ public interface CTFTeam {
 	public void subToScore(int decrement);
 	
 	//Methods for setting and getting Goal Regions
-	public Region getGoal();
-	public void setgoal(Region goal);
+	public Goal getGoal();
+	public void setgoal(Goal goal);
 
 	//Methods for setting and getting Spawn Point
 	public void setSpawn(Location spawnLocation);
