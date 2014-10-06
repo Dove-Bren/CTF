@@ -40,7 +40,7 @@ public class NoEditSession implements CTFSession {
 	 */
 	@Override
 	public void createTeam(String name) {
-		
+		this.Teams.add(new NoEditTeam());
 	}
 
 	@Override

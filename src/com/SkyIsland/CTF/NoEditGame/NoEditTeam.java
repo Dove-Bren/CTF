@@ -12,6 +12,7 @@ import com.SkyIsland.CTF.Team.TeamPlayer;
 
 public class NoEditTeam implements CTFTeam {
 
+	private String TeamName;
 	private List<Player> Players;
 	private int score;
 	private Goal TeamGoal;
@@ -29,19 +30,47 @@ public class NoEditTeam implements CTFTeam {
 	}
 	
 	/**
+	 * This constructor allows for specification of the Team name
+	 * @param TeamName
+	 */
+	public NoEditTeam(String TeamName) {
+		setTeamName(TeamName);
+		setPlayers(null);
+		this.score = 0;
+		setgoal(null);
+		setSpawn(null);
+	}
+	
+	/**
 	 * This is the main constructor, all fields are specified
 	 * @param Players The list of players to be in the team
 	 * @param score The current score of the team
 	 * @param TeamGoal The Goal Region of the team
 	 * @param SpawnLocation The spawn location of the team players
 	 */
-	public NoEditTeam(List<Player> Players, int score, Goal TeamGoal, Location SpawnLocation) {
+	public NoEditTeam(String TeamName, List<Player> Players, int score, Goal TeamGoal, Location SpawnLocation) {
+		setTeamName(TeamName);
 		setPlayers(Players);
 		this.score = 0;
 		setgoal(TeamGoal);
 		setSpawn(SpawnLocation);
 	}
 	
+	/**
+	 * This method sets the Team's name
+	 * @param TeamName The new Team Name
+	 */
+	public void setTeamName(String TeamName) {
+		this.TeamName = TeamName;
+	}
+	
+	/**
+	 * This method returns the Team name
+	 * @return The Team name
+	 */
+	public String GetTeamName() {
+		return this.TeamName;
+	}
 	//Below are method inherited by the CTFTeam Interface
 	@Override
 	public void setPlayers(List<Player> list) {
