@@ -1,9 +1,11 @@
 package com.SkyIsland.CTF.NoEditGame;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
 
 
 import com.SkyIsland.CTF.Team.CTFTeam;
@@ -23,7 +25,7 @@ public class NoEditTeam implements CTFTeam {
 	 * This is the default constructor, nothing is specified
 	 */
 	public NoEditTeam() {
-		setPlayers(null);
+		Players = new LinkedList<Player>();
 		this.score = 0;
 		setgoal(null);
 		setSpawn(null);
@@ -35,7 +37,7 @@ public class NoEditTeam implements CTFTeam {
 	 */
 	public NoEditTeam(String TeamName) {
 		setTeamName(TeamName);
-		setPlayers(null);
+		Players = new LinkedList<Player>();
 		this.score = 0;
 		setgoal(null);
 		setSpawn(null);
