@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.CTFSession;
@@ -104,6 +105,23 @@ public class NoEditSession implements CTFSession, Listener {
 			event.getClickedBlock().breakNaturally();
 			event.setCancelled(true);
 		}
+	}
+	
+	@EventHandler
+	public void playerMove(PlayerMoveEvent event) {
+		NoEditTeam team = null;
+		for (CTFTeam t : Teams) {
+			if (t.inTeam(event.getPlayer())) {
+				team = (NoEditTeam) t;
+				break;
+			}
+		}
+		
+		if (team != null && team.getGoal().isInGoal(event.getTo())) {
+			//goal
+		}
+		
+		
 	}
 	
 

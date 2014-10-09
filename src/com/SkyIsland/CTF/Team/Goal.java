@@ -1,7 +1,6 @@
 package com.SkyIsland.CTF.Team;
 
 import org.bukkit.Location;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.Region;
@@ -44,7 +43,7 @@ public abstract class Goal {
 	 * @param playerLocation The player's location
 	 * @return True if the player is in the Goal, false if otherwise
 	 */
-	private boolean isInGoal(Location playerLocation) {
+	public boolean isInGoal(Location playerLocation) {
 		Vector Max = GoalDimensions.getMaximumPoint();
 		Vector Min = GoalDimensions.getMinimumPoint();
 		
