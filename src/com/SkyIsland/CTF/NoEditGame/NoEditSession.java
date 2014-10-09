@@ -1,13 +1,20 @@
 package com.SkyIsland.CTF.NoEditGame;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 
+import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.CTFSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 
-public class NoEditSession implements CTFSession {
+public class NoEditSession implements CTFSession, Listener {
 
 	private List<CTFTeam> Teams;
 	
@@ -15,7 +22,8 @@ public class NoEditSession implements CTFSession {
 	 * Default constructor for a No Edit Game Session
 	 */
 	public NoEditSession() {
-		this.Teams = null;
+		this.Teams = new LinkedList<CTFTeam>();
+		Bukkit.getPluginManager().registerEvents(this, CTFPlugin.plugin);
 	}
 	
 	/**
@@ -84,5 +92,15 @@ public class NoEditSession implements CTFSession {
 		// TODO Auto-generated method stub
 
 	}
+	
+	
+	@EventHandler
+	public void punchWool(PlayerInteractEvent event) {
+		if (event.getClickedBlock().getType() == Material.WOOL) {
+			event.getClickedBlock().breakNaturally();
+			event.setCancelled(true);
+		}
+	}
+	
 
 }
