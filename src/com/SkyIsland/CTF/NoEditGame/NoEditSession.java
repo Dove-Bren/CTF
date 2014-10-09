@@ -17,6 +17,7 @@ import com.SkyIsland.CTF.Team.CTFTeam;
 public class NoEditSession implements CTFSession, Listener {
 
 	private List<CTFTeam> Teams;
+	private boolean running;
 	
 	/**
 	 * Default constructor for a No Edit Game Session
@@ -48,37 +49,40 @@ public class NoEditSession implements CTFSession, Listener {
 	 */
 	@Override
 	public void createTeam(String name) {
-		this.Teams.add(new NoEditTeam());
+		this.Teams.add(new NoEditTeam(name));
 	}
 
 	@Override
 	public void createTeam(String name, List<Player> players) {
-		// TODO Auto-generated method stub
-
+		NoEditTeam team;
+		team = new NoEditTeam(name);
+		this.Teams.add(team);
+		team.setPlayers(players);
 	}
 
 	@Override
 	public void removeTeam(CTFTeam team) {
-		// TODO Auto-generated method stub
-
+		if (Teams.contains(team)) {
+			Teams.remove(team);
+		}
 	}
 
 	@Override
 	public void addPlayer(CTFTeam team, Player player) {
-		// TODO Auto-generated method stub
-
+		if (Teams.contains(team)) //only add if this session has that team???
+			team.addPlayer(player);
 	}
 
 	@Override
 	public void removePlayer(CTFTeam team, Player player) {
-		// TODO Auto-generated method stub
-
+		if (Teams.contains(team)) {
+			team.removePlayer(player);
+		}
 	}
 
 	@Override
 	public boolean isRunning() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.running;
 	}
 
 	@Override
