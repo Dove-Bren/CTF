@@ -186,6 +186,9 @@ public class NoEditTeam implements CTFTeam {
 	private Location randomLocation(List<Location> locations) {
 		int size = locations.size();
 		Random r = new Random();
+		if (size == 0){
+			return null;
+		}
 		return locations.get(r.nextInt(size));
 	}
 	
@@ -242,7 +245,10 @@ public class NoEditTeam implements CTFTeam {
 		Location flagRespawn = randomLocation(this.flagLocations);
 		Wool w = new Wool();
 		w.setColor(this.teamColor);
-		flagRespawn.getBlock().setType(w.getItemType());
+		if ((flagRespawn) != null){
+			flagRespawn.getBlock().setType(w.getItemType());
+		}
+		
 	}
 	
 	@Override
