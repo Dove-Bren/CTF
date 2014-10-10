@@ -10,13 +10,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
-public class CTFPlugin extends JavaPlugin {
+public class CTFPlugin extends JavaPlugin implements Listener {
 	
 	public static CTFPlugin plugin;
 	public static WorldEditPlugin weplugin;
@@ -33,6 +36,7 @@ public class CTFPlugin extends JavaPlugin {
 		playerMap = new HashMap<UUID, TeamPlayer>();
 		CTFPlugin.plugin = this;
 		CTFPlugin.weplugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+		Bukkit.getPluginManager().registerEvents(this, this);
 	}
 	
 	public void onDisable() {
@@ -124,5 +128,21 @@ public class CTFPlugin extends JavaPlugin {
 	 */
 	public TeamPlayer getTeamPlayer(UUID pID) {
 		return playerMap.get(pID);
+	}
+	
+	/**
+	 * Adds the passed player to the map between players and TeamPlayers if they don't already have an entity
+	 * @param player
+	 */
+	private void hashPlayer(Player player) {
+		if (playerMap.containsKey(player.getUniqueId())) {
+			return;
+		}
+		playerMap.put(player.getUniqueId(), new TeamPlayer(player));
+	}
+	
+	@EventHandler
+	public void playerJoin(PlayerJoinEvent event) {
+		hashPlayer(event.getPlayer());
 	}
 }
