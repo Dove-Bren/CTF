@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -21,7 +22,7 @@ public class CTFPlugin extends JavaPlugin {
 	public static WorldEditPlugin weplugin;
 	private List<CTFSession> sessions;
 	
-	private Map<Player, TeamPlayer> playerMap;
+	private Map<UUID, TeamPlayer> playerMap;
 	
 	public void onLoad() {
 		
@@ -29,7 +30,7 @@ public class CTFPlugin extends JavaPlugin {
 	
 	public void onEnable() {
 		sessions = new LinkedList<CTFSession>();
-		playerMap = new HashMap<Player, TeamPlayer>();
+		playerMap = new HashMap<UUID, TeamPlayer>();
 		CTFPlugin.plugin = this;
 		CTFPlugin.weplugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
 	}
@@ -100,5 +101,28 @@ public class CTFPlugin extends JavaPlugin {
 		
 		
 		return false;
+	}
+	
+	/**
+	 * Returns the {@link com.SkyIsland.CTF.Team.TeamPlayer TeamPlayer} corresponding to the passed
+	 * {@link org.bukkit.entity.Player Player},
+	 * or null if none exist.
+	 * @param player The player to try and get the TeamPlayer for
+	 * @return
+	 */
+	public TeamPlayer getTeamPlayer(Player player) {
+		UUID id = player.getUniqueId();
+		return playerMap.get(id);
+	}
+
+	/**
+	 * Returns the {@link com.SkyIsland.CTF.Team.TeamPlayer TeamPlayer} corresponding to the passed
+	 * {@link org.bukkit.entity.Player Player},
+	 * or null if none exist.
+	 * @param pID Unique User ID to try and find the TeamPlayer for
+	 * @return
+	 */
+	public TeamPlayer getTeamPlayer(UUID pID) {
+		return playerMap.get(pID);
 	}
 }
