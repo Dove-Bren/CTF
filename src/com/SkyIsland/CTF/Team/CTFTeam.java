@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -18,9 +17,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
  */
 public interface CTFTeam {
 	
-	public void setPlayers(List<Player> list);
-	
-	public List<Player> getPlayers();
 	
 	//methods for lists of flagLocations
 	public List<Location> getFlagLocations();
@@ -37,9 +33,9 @@ public interface CTFTeam {
 	@EventHandler
 	public void handleTeamPlayerRespawn(PlayerRespawnEvent e);
 	
-	public void addPlayer(Player player);
+	public void addPlayer(TeamPlayer player);
 	
-	public void removePlayer(Player player);
+	public void removePlayer(TeamPlayer player);
 	
 	//methods for score handling
 	public int getScore();
@@ -53,9 +49,7 @@ public interface CTFTeam {
 	public void setgoal(Goal goal);
 	
 	//Checks to see if a player is in a team
-	public boolean inTeam(Player player);
-	
-	public TeamPlayer getTeamPlayer(Player player);
+	public boolean inTeam(TeamPlayer player);
 	
 	public String getName();
 	
@@ -64,6 +58,8 @@ public interface CTFTeam {
 	public void setColor(DyeColor color);
 	
 	public List<TeamPlayer> getTeamPlayers();
+	
+	public void setTeamPlayers(List<TeamPlayer> list);
 
 	
 	

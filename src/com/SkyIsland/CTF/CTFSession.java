@@ -2,9 +2,9 @@ package com.SkyIsland.CTF;
 
 import java.util.List;
 
-import org.bukkit.entity.Player;
 
 import com.SkyIsland.CTF.Team.CTFTeam;
+import com.SkyIsland.CTF.Team.TeamPlayer;
 
 public interface CTFSession {
 	
@@ -12,13 +12,13 @@ public interface CTFSession {
 	
 	public CTFTeam createTeam(String name);
 	
-	public CTFTeam createTeam(String name, List<Player> players);
+	public CTFTeam createTeam(String name, List<TeamPlayer> players);
 	
 	public void removeTeam(CTFTeam team);
 	
-	public void addPlayer(CTFTeam team, Player player);
+	public void addPlayer(CTFTeam team, TeamPlayer player);
 	
-	public void removePlayer(CTFTeam team, Player player);
+	public void removePlayer(CTFTeam team, TeamPlayer player);
 	
 	public boolean isRunning();
 	

@@ -20,11 +20,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
+import com.SkyIsland.CTF.NoEditGame.NoEditGoal;
 import com.SkyIsland.CTF.NoEditGame.NoEditSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 
 public class CTFPlugin extends JavaPlugin implements Listener {
 	
@@ -138,8 +141,8 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				return true;
 			}
 			
-			team.removePlayer((Player) sender);
-			tp.setTeam(null);
+			team.removePlayer(tp);
+			sender.sendMessage("You have left your team.");
 			return true;
 		}
 		
@@ -149,8 +152,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				for (CTFSession s: sessions) {
 					if (s.hasTeam(args[0])) {
 						CTFTeam team = s.getTeam(args[0]);
-						team.addPlayer((Player) sender);
-						getTeamPlayer((Player) sender).setTeam(team);
+						team.addPlayer( getTeamPlayer((Player) sender));
 						sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
 						return true;
 					}
@@ -186,8 +188,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				}
 				
 				//found both the session and team
-				team.addPlayer((Player) sender);
-				getTeamPlayer((Player) sender).setTeam(team);
+				team.addPlayer(getTeamPlayer((Player) sender));
 				sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + session.getName() + "]!");
 
 				return true;
@@ -263,14 +264,14 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[1])) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
 							session = s;
 							break;
 						}
 					}
 					if (session == null) {
 						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
+						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
 						return true;
 					}
 					session.start();
@@ -283,14 +284,14 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[1])) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
 							session = s;
 							break;
 						}
 					}
 					if (session == null) {
 						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
+						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
 						return true;
 					}
 					session.stop();
@@ -303,22 +304,29 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[1])) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
 							session = s;
 							break;
 						}
 					}
 					if (session == null) {
 						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
+						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
 						return true;
 					}
 
 					if (session.isRunning()) {
 						session.stop();
 					}
+					//remove all teams
+					if (!session.getTeams().isEmpty()) 
+					for (CTFTeam t : session.getTeams()) {
+						for (TeamPlayer tp : t.getTeamPlayers()) {
+							tp.setTeam(null);
+						}
+					}
 					sessions.remove(session);
-					sender.sendMessage("Session " + session.getName() + "removed!");
+					sender.sendMessage("Session " + session.getName() + " removed!");
 					return true;
 				}
 				
@@ -326,7 +334,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			else if (args[0].equalsIgnoreCase("team")) {
 				//we can create teams or remove teams
 				if (args.length == 1) {
-					sender.sendMessage("/cf team [create/remove/spawn/flag]");
+					sender.sendMessage("/cf team [create/remove/spawn/flag/goal]");
 					return true; //no /ctf team   command
 				}
 				if (args[1].equalsIgnoreCase("create")) {
@@ -518,6 +526,67 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 					
 				}
+				else if (args[1].equalsIgnoreCase("goal")) {
+					//it'll be /ctf team flag add [session] [team]
+					if (args.length != 4) {
+						sender.sendMessage("/cf team goal [session name] [team name]");
+						return true; 
+					}
+					//this also uses selection, which is only made by a player
+					if (!(sender instanceof Player)) {
+						sender.sendMessage("Only players are able to use this command!");
+						return true;
+					}
+					
+					CTFSession session = null;
+					CTFTeam team;
+						
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
+							session = s;
+							break;
+						}
+					}
+						
+					if (session == null) {
+						sender.sendMessage("Unable to find session with the name " + args[2]);
+						return true;
+					}
+						
+					//now get the team
+					team = session.getTeam(args[3]);
+						
+					if (team == null) {
+						sender.sendMessage("Unable to find team with the name " + args[3]);
+						return true;
+					}
+						
+					//team and session are both good. 
+					Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+					if (selection == null || selection.getArea() == 0) {
+						sender.sendMessage("You must select an area to set as a goal!");
+						return true;
+					}
+					
+					
+					//NoEditGoal goal = new NoEditGoal(selection);
+					//Region region = CTFPlugin.wgplugin.getRegionManager();
+					Location min, max;
+					min = selection.getMinimumPoint();
+					max = selection.getMaximumPoint();
+					com.sk89q.worldedit.Vector minV, maxV;
+					minV = new com.sk89q.worldedit.Vector(min.getX(), min.getY(), min.getZ());
+					maxV = new com.sk89q.worldedit.Vector(max.getX(), max.getY(), max.getZ());
+					Region region = new CuboidRegion(minV, maxV);
+					
+					NoEditGoal goal = new NoEditGoal(region, team);
+					
+					team.setgoal(goal);
+					
+					sender.sendMessage("set the goal for team " + team.getName());
+					return true;						
+				}
+					
 					
 			}
 		}

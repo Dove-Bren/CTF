@@ -11,7 +11,7 @@ commands:
         permission: ctfadmin
         usage: /cf [session/team] [args]
         description: base command for admin-level ctf commands
-        aliases: cf, ctf
+        aliases: [cf, ctf]
     join:
         permission: ctfplayer
         usage: /join [session] <team>

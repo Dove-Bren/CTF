@@ -7,7 +7,6 @@ import java.util.Random;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 
 
 
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Wool;
 
+import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.Goal;
 import com.SkyIsland.CTF.Team.TeamPlayer;
@@ -26,7 +26,6 @@ import com.SkyIsland.CTF.Team.TeamPlayer;
 public class NoEditTeam implements CTFTeam {
 
 	private String TeamName;
-	private List<Player> Players;
 	private List<TeamPlayer> teamPlayers;
 	private List<Location> spawnLocations;
 	private List<Location> flagLocations;
@@ -42,7 +41,6 @@ public class NoEditTeam implements CTFTeam {
 	 */
 	public NoEditTeam(String TeamName) {
 		setTeamName(TeamName);
-		Players = new LinkedList<Player>();
 		teamPlayers = new LinkedList<TeamPlayer>();
 		this.score = 0;
 		setgoal(null);
@@ -56,10 +54,9 @@ public class NoEditTeam implements CTFTeam {
 	 * @param TeamGoal The Goal Region of the team
 	 * @param SpawnLocation The spawn location of the team players
 	 */
-	public NoEditTeam(String TeamName, List<Player> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
+	public NoEditTeam(String TeamName, List<TeamPlayer> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
 		setTeamName(TeamName);
-		setPlayers(Players);
-		teamPlayers = new LinkedList<TeamPlayer>();
+		setTeamPlayers(Players);
 		this.score = 0;
 		setgoal(TeamGoal);
 		setSpawnLocations(spawnLocations);
@@ -83,23 +80,21 @@ public class NoEditTeam implements CTFTeam {
 	}
 	//Below are method inherited by the CTFTeam Interface
 	@Override
-	public void setPlayers(List<Player> list) {
-		this.Players = list;
+	public void setTeamPlayers(List<TeamPlayer> list) {
+		this.teamPlayers = list;
+	}
+
+
+	@Override
+	public void addPlayer(TeamPlayer player) {
+		this.teamPlayers.add(player);
+		player.setTeam(this);
 	}
 
 	@Override
-	public List<Player> getPlayers() {
-		return this.Players;
-	}
-
-	@Override
-	public void addPlayer(Player player) {
-		this.Players.add(player);
-	}
-
-	@Override
-	public void removePlayer(Player player) {
-		this.Players.remove(player);
+	public void removePlayer(TeamPlayer player) {
+		this.teamPlayers.remove(player);
+		player.setTeam(null);
 	}
 
 	@Override
@@ -129,17 +124,8 @@ public class NoEditTeam implements CTFTeam {
 	}
 
 	@Override
-	public boolean inTeam(Player player) {
-		return this.Players.contains(player);
-	}
-	
-	/**
-	 * @TODO IMPLEMENT METHOD
-	 */
-	@Override
-	public TeamPlayer getTeamPlayer(Player player) {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean inTeam(TeamPlayer player) {
+		return this.teamPlayers.contains(player);
 	}
 
 	@Override
@@ -167,7 +153,7 @@ public class NoEditTeam implements CTFTeam {
 	 */
 	@Override
 	public void handleTeamPlayerDeath(PlayerDeathEvent e) {
-		if (inTeam(e.getEntity())) {
+		if (inTeam( CTFPlugin.getTeamPlayer(e.getEntity())  )) {
 			for (ItemStack i : e.getEntity().getInventory()) {
 				if (i.equals(Material.WOOL)) {
 					//DROP ANY FUCKING WOOL
@@ -221,7 +207,7 @@ public class NoEditTeam implements CTFTeam {
 	 */
 	@Override
 	public void handleTeamPlayerRespawn(PlayerRespawnEvent e) {
-		if(inTeam(e.getPlayer())) {
+		if(inTeam(   CTFPlugin.getTeamPlayer(e.getPlayer())  )) {
 			e.setRespawnLocation(randomLocation(this.spawnLocations));
 		}
 		e.getPlayer().getInventory().setArmorContents(generateArmor());

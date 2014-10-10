@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -15,6 +14,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.CTFSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
+import com.SkyIsland.CTF.Team.TeamPlayer;
 
 public class NoEditSession implements CTFSession, Listener {
 
@@ -65,11 +65,11 @@ public class NoEditSession implements CTFSession, Listener {
 	 * @param players The list of players to be associated with the team
 	 */
 	@Override
-	public CTFTeam createTeam(String name, List<Player> players) {
+	public CTFTeam createTeam(String name, List<TeamPlayer> players) {
 		NoEditTeam team;
 		team = new NoEditTeam(name);
 		this.Teams.add(team);
-		team.setPlayers(players);
+		team.setTeamPlayers(players);
 		return team;
 	}
 
@@ -81,13 +81,13 @@ public class NoEditSession implements CTFSession, Listener {
 	}
 
 	@Override
-	public void addPlayer(CTFTeam team, Player player) {
+	public void addPlayer(CTFTeam team, TeamPlayer player) {
 		if (Teams.contains(team)) //only add if this session has that team???
 			team.addPlayer(player);
 	}
 
 	@Override
-	public void removePlayer(CTFTeam team, Player player) {
+	public void removePlayer(CTFTeam team, TeamPlayer player) {
 		if (Teams.contains(team)) {
 			team.removePlayer(player);
 		}
@@ -124,13 +124,14 @@ public class NoEditSession implements CTFSession, Listener {
 	public void playerMove(PlayerMoveEvent event) {
 		NoEditTeam team = null;
 		for (CTFTeam t : Teams) {
-			if (t.inTeam(event.getPlayer())) {
+			if (t.inTeam(         CTFPlugin.getTeamPlayer(event.getPlayer())       )) {
 				team = (NoEditTeam) t;
 				break;
 			}
 		}
 		
-		if (team.getGoal() != null && (team != null && team.getGoal().isInGoal(event.getTo()))) {
+		//if (team.getGoal() != null && (team != null && team.getGoal().isInGoal(event.getTo()))) {
+		if (team != null && team.getGoal() != null && team.getGoal().isInGoal(event.getTo())) {
 			//goal
 		}
 		
