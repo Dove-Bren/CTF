@@ -46,7 +46,7 @@ public abstract class Goal {
 	 * @param p The player 
 	 * @return True if a player scores
 	 */
-	public abstract boolean isValidScore(Player p);
+	public abstract boolean isValidScore(TeamPlayer p);
 	
 	/**
 	 * This method determines if the given player location is within this Goal's dimensions
