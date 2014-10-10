@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -112,6 +113,7 @@ public class NoEditSession implements CTFSession, Listener {
 	
 	@EventHandler
 	public void punchWool(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_BLOCK)
 		if (event.getClickedBlock().getType() == Material.WOOL) {
 			event.getClickedBlock().breakNaturally();
 			event.setCancelled(true);
