@@ -7,10 +7,11 @@ permissions:
     ctfplayer:
         default: true
 commands:
-    ctf:
+    capturetheflag:
         permission: ctfadmin
         usage: /ctf <command> [args]
         description: base command for admin-level ctf commands
+        alias: ctf
     join:
         permission: ctfplayer
         usage: /join [session] <team>
