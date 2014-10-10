@@ -1,5 +1,6 @@
 package com.SkyIsland.CTF;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.SkyIsland.CTF.NoEditGame.NoEditSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -25,7 +27,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	public static WorldEditPlugin weplugin;
 	private List<CTFSession> sessions;
 	
-	private Map<UUID, TeamPlayer> playerMap;
+	private static Map<UUID, TeamPlayer> playerMap = new HashMap<UUID, TeamPlayer>();
 	
 	public void onLoad() {
 		
@@ -33,10 +35,12 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	
 	public void onEnable() {
 		sessions = new LinkedList<CTFSession>();
-		playerMap = new HashMap<UUID, TeamPlayer>();
 		CTFPlugin.plugin = this;
 		CTFPlugin.weplugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
 		Bukkit.getPluginManager().registerEvents(this, this);
+		
+		CTFTypes.registerType(NoEditSession.class);
+		
 	}
 	
 	public void onDisable() {
@@ -44,6 +48,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		sessions = null;
 		playerMap.clear();
 		playerMap = null;
+		CTFTypes.clear();
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -179,6 +184,84 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			}
 		}
 		
+		if (command.equalsIgnoreCase("capturetheflag")) {
+			//admin command. commands are: session, team
+			if (args.length == 0) {
+				return false; //no just ctf command
+			}
+			
+			if (args[0].equalsIgnoreCase("session")) {
+				//what to do with session. We cant create one, delete one, start one, or end one
+				if (args.length == 1) {
+					return false; //no /ctf session command
+				}
+				if (args[1].equalsIgnoreCase("create")) {
+					//going to create one. Need to pass a type
+					if (args.length < 4) {
+						return false; //need at least 4: session, create, type, name
+					}
+					Class<? extends CTFSession> sesClass = CTFTypes.getSession(args[2]);
+					if (sesClass == null) {
+						//couldn't find that kind of session
+						sender.sendMessage("Invalid session type!");
+						return false;
+					}
+					
+					CTFSession session = null;
+					try {
+						session = sesClass.getConstructor(String.class).newInstance(args[3]);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if (session == null) {
+						sender.sendMessage("Unable to instantiate the session...");
+						return false;
+					}
+					
+					sessions.add(session);
+					sender.sendMessage("Session <" + session.getName() + "> created!");
+					return true;
+					
+				}
+				else if (args[0].equalsIgnoreCase("start")) {
+					if (args.length != 2) {
+						return false; //has to be ctf start <session>
+					}
+					CTFSession session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[1])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						//diddn't find a session with that name
+						sender.sendMessage("Session with the name " + session.getName() + " wasn't found!");
+						return true;
+					}
+					session.start();
+					return true;
+				}
+			}
+		}
+		
 		
 		return false;
 	}
@@ -190,7 +273,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	 * @param player The player to try and get the TeamPlayer for
 	 * @return
 	 */
-	public TeamPlayer getTeamPlayer(Player player) {
+	public static TeamPlayer getTeamPlayer(Player player) {
 		UUID id = player.getUniqueId();
 		return playerMap.get(id);
 	}
@@ -202,7 +285,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	 * @param pID Unique User ID to try and find the TeamPlayer for
 	 * @return
 	 */
-	public TeamPlayer getTeamPlayer(UUID pID) {
+	public static TeamPlayer getTeamPlayer(UUID pID) {
 		return playerMap.get(pID);
 	}
 	
@@ -210,7 +293,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	 * Adds the passed player to the map between players and TeamPlayers if they don't already have an entity
 	 * @param player
 	 */
-	private void hashPlayer(Player player) {
+	private static void hashPlayer(Player player) {
 		if (playerMap.containsKey(player.getUniqueId())) {
 			return;
 		}
@@ -223,6 +306,6 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	 */
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event) {
-		hashPlayer(event.getPlayer());
+		CTFPlugin.hashPlayer(event.getPlayer());
 	}
 }
