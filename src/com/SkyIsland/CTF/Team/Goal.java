@@ -13,15 +13,16 @@ import com.sk89q.worldedit.regions.Region;
  */
 public abstract class Goal {
 	
-	private Region GoalDimensions;
-	private CTFTeam GoalTeam;
+	protected Region GoalDimensions;
+	protected CTFTeam GoalTeam;
 	
 	/**
 	 * This is the constructor for the Goal Class
 	 * @param GoalDimensions
 	 */
-	public Goal (Region GoalDimensions) {
+	public Goal (Region GoalDimensions, CTFTeam myTeam) {
 		this.GoalDimensions = GoalDimensions;
+		this.GoalTeam = myTeam;
 	}
 	
 	/**

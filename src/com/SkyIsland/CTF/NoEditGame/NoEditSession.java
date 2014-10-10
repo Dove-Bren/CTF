@@ -45,7 +45,7 @@ public class NoEditSession implements CTFSession, Listener {
 	}
 	
 	/**
-	 * This method generates a new Team within the Game Session with the specified name
+	 * This method generates a new empty Team within the Game Session with the specified name
 	 * @param name The Name to be attributed to the team
 	 */
 	@Override
@@ -53,6 +53,11 @@ public class NoEditSession implements CTFSession, Listener {
 		this.Teams.add(new NoEditTeam(name));
 	}
 
+	/**
+	 * This method generates a new Team with the players and name specified
+	 * @param name The Team Name
+	 * @param players The list of players to be associated with the team
+	 */
 	@Override
 	public void createTeam(String name, List<Player> players) {
 		NoEditTeam team;
