@@ -13,15 +13,16 @@ import com.sk89q.worldedit.regions.Region;
  */
 public abstract class Goal {
 	
-	private Region GoalDimensions;
-	private CTFTeam GoalTeam;
+	protected Region GoalDimensions;
+	protected CTFTeam GoalTeam;
 	
 	/**
 	 * This is the constructor for the Goal Class
 	 * @param GoalDimensions
 	 */
-	public Goal (Region GoalDimensions) {
+	public Goal (Region GoalDimensions, CTFTeam myTeam) {
 		this.GoalDimensions = GoalDimensions;
+		this.GoalTeam = myTeam;
 	}
 	
 	/**
@@ -45,7 +46,7 @@ public abstract class Goal {
 	 * @param p The player 
 	 * @return True if a player scores
 	 */
-	public abstract boolean isValidScore(Player p);
+	public abstract boolean isValidScore(TeamPlayer p);
 	
 	/**
 	 * This method determines if the given player location is within this Goal's dimensions
