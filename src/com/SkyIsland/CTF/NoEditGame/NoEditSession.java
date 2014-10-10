@@ -190,7 +190,7 @@ public class NoEditSession implements CTFSession, Listener {
 		}
 		
 		//if (team.getGoal() != null && (team != null && team.getGoal().isInGoal(event.getTo()))) {
-		if (team != null && team.getGoal() != null && team.getGoal().isInGoal(event.getTo())) {
+		if (team != null && team.getGoal() != null && team.getGoal().isInGoal(event.getTo()) && team.getGoal().isValidScore(CTFPlugin.getTeamPlayer(event.getPlayer()))) {
 			team.addToScore(1);
 		}
 		

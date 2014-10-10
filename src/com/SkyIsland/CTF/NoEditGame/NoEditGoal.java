@@ -47,8 +47,10 @@ public final class NoEditGoal extends Goal {
 			if (m.equals(Material.WOOL))
 			{
 				//Check to see if it is my own team color
-				if (!m.equals(w.toItemStack()))
+				if (!m.equals(w.toItemStack())) {
+					p.getPlayer().getInventory().remove(m);
 					return true;
+				}
 				else {
 					this.GoalTeam.resetFlag();
 					p.getPlayer().getInventory().remove(m);
