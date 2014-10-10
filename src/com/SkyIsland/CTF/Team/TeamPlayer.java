@@ -16,6 +16,7 @@ public class TeamPlayer {
 	public TeamPlayer(Player player) {
 		this.player = player;
 		this.hasFlag = false;
+		team = null;
 	}
 	
 	
@@ -30,6 +31,10 @@ public class TeamPlayer {
 	
 	public CTFTeam getTeam() {
 		return this.team;
+	}
+	
+	public void setTeam(CTFTeam team) {
+		this.team = team;
 	}
 	
 	

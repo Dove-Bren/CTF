@@ -1,27 +1,33 @@
 package com.SkyIsland.CTF;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.SkyIsland.CTF.NoEditGame.NoEditSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
-public class CTFPlugin extends JavaPlugin {
+public class CTFPlugin extends JavaPlugin implements Listener {
 	
 	public static CTFPlugin plugin;
 	public static WorldEditPlugin weplugin;
 	private List<CTFSession> sessions;
 	
-	private Map<Player, TeamPlayer> playerMap;
+	private static Map<UUID, TeamPlayer> playerMap = new HashMap<UUID, TeamPlayer>();
 	
 	public void onLoad() {
 		
@@ -29,9 +35,12 @@ public class CTFPlugin extends JavaPlugin {
 	
 	public void onEnable() {
 		sessions = new LinkedList<CTFSession>();
-		playerMap = new HashMap<Player, TeamPlayer>();
 		CTFPlugin.plugin = this;
 		CTFPlugin.weplugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+		Bukkit.getPluginManager().registerEvents(this, this);
+		
+		CTFTypes.registerType(NoEditSession.class);
+		
 	}
 	
 	public void onDisable() {
@@ -39,6 +48,7 @@ public class CTFPlugin extends JavaPlugin {
 		sessions = null;
 		playerMap.clear();
 		playerMap = null;
+		CTFTypes.clear();
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -95,10 +105,207 @@ public class CTFPlugin extends JavaPlugin {
 		}
 		
 		if (command.equalsIgnoreCase("leave")) {
+			if (!(sender instanceof Player)) {
+				sender.sendMessage("Only players can execute this command!");
+				return true;
+			}
+			TeamPlayer tp = getTeamPlayer((Player) sender);
+			if (tp == null) {
+				//didn't have a teamPlayer...?
+				sender.sendMessage("<REGERR> You have left your team!");
+				hashPlayer((Player) sender);
+				return true;
+			}
 			
+			CTFTeam team = tp.getTeam();
+			
+			if (team == null) {
+				sender.sendMessage("You're not in a team!");
+				return true;
+			}
+			
+			team.removePlayer((Player) sender);
+			tp.setTeam(null);
+			return true;
+		}
+		
+		if (command.equalsIgnoreCase("join")) {
+			if (args.length == 1) {
+				//specified only the team to join. join hte first
+				for (CTFSession s: sessions) {
+					if (s.hasTeam(args[0])) {
+						CTFTeam team = s.getTeam(args[0]);
+						team.addPlayer((Player) sender);
+						getTeamPlayer((Player) sender).setTeam(team);
+						sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
+						return true;
+					}
+				}
+				//never returned so never found that team
+				sender.sendMessage("Could not find a team with that name! Try using /lteams to see all available teams");
+				return true;
+			}
+			else if (args.length == 2) {
+				//arg 1 is session, arg 2 is team 
+				CTFSession session = null;
+				CTFTeam team = null;
+				//first try and get the session.
+				for (CTFSession s : sessions) {
+					if (s.getName() == args[0]) {
+						//found the sesson
+						session = s;
+						break;
+					}
+				}
+				
+				//make sure we found the sesson
+				if (session == null) {
+					sender.sendMessage("Could not find the session " + args[0] + "!");
+					return false;
+				}
+				
+				//we found the session, so try and find the team
+				team = session.getTeam(args[1]);
+				if (team == null) {
+					sender.sendMessage("Could not find the team " + args[1] + "!");
+					return false;
+				}
+				
+				//found both the session and team
+				team.addPlayer((Player) sender);
+				getTeamPlayer((Player) sender).setTeam(team);
+				sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + session.getName() + "]!");
+
+				return true;
+			}
+			else {
+				//invalid argument cound
+				return false;
+			}
+		}
+		
+		if (command.equalsIgnoreCase("capturetheflag")) {
+			//admin command. commands are: session, team
+			if (args.length == 0) {
+				return false; //no just ctf command
+			}
+			
+			if (args[0].equalsIgnoreCase("session")) {
+				//what to do with session. We cant create one, delete one, start one, or end one
+				if (args.length == 1) {
+					return false; //no /ctf session command
+				}
+				if (args[1].equalsIgnoreCase("create")) {
+					//going to create one. Need to pass a type
+					if (args.length < 4) {
+						return false; //need at least 4: session, create, type, name
+					}
+					Class<? extends CTFSession> sesClass = CTFTypes.getSession(args[2]);
+					if (sesClass == null) {
+						//couldn't find that kind of session
+						sender.sendMessage("Invalid session type!");
+						return false;
+					}
+					
+					CTFSession session = null;
+					try {
+						session = sesClass.getConstructor(String.class).newInstance(args[3]);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if (session == null) {
+						sender.sendMessage("Unable to instantiate the session...");
+						return false;
+					}
+					
+					sessions.add(session);
+					sender.sendMessage("Session <" + session.getName() + "> created!");
+					return true;
+					
+				}
+				else if (args[0].equalsIgnoreCase("start")) {
+					if (args.length != 2) {
+						return false; //has to be ctf start <session>
+					}
+					CTFSession session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[1])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						//diddn't find a session with that name
+						sender.sendMessage("Session with the name " + session.getName() + " wasn't found!");
+						return true;
+					}
+					session.start();
+					return true;
+				}
+			}
 		}
 		
 		
 		return false;
+	}
+	
+	/**
+	 * Returns the {@link com.SkyIsland.CTF.Team.TeamPlayer TeamPlayer} corresponding to the passed
+	 * {@link org.bukkit.entity.Player Player},
+	 * or null if none exist.
+	 * @param player The player to try and get the TeamPlayer for
+	 * @return
+	 */
+	public static TeamPlayer getTeamPlayer(Player player) {
+		UUID id = player.getUniqueId();
+		return playerMap.get(id);
+	}
+
+	/**
+	 * Returns the {@link com.SkyIsland.CTF.Team.TeamPlayer TeamPlayer} corresponding to the passed
+	 * {@link org.bukkit.entity.Player Player},
+	 * or null if none exist.
+	 * @param pID Unique User ID to try and find the TeamPlayer for
+	 * @return
+	 */
+	public static TeamPlayer getTeamPlayer(UUID pID) {
+		return playerMap.get(pID);
+	}
+	
+	/**
+	 * Adds the passed player to the map between players and TeamPlayers if they don't already have an entity
+	 * @param player
+	 */
+	private static void hashPlayer(Player player) {
+		if (playerMap.containsKey(player.getUniqueId())) {
+			return;
+		}
+		playerMap.put(player.getUniqueId(), new TeamPlayer(player));
+	}
+	
+	/**
+	 * Called when a player joins the world. This created a TeamPlayer for them and updates the hashmap.
+	 * @param event
+	 */
+	@EventHandler
+	public void playerJoin(PlayerJoinEvent event) {
+		CTFPlugin.hashPlayer(event.getPlayer());
 	}
 }

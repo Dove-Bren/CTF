@@ -137,5 +137,24 @@ public class NoEditSession implements CTFSession, Listener {
 		return this.name;
 	}
 	
+	@Override
+	public boolean hasTeam(String name) {
+		for (CTFTeam t : Teams) {
+			if (t.getName() == name) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public CTFTeam getTeam(String name) {
+		for (CTFTeam t : Teams) {
+			if (t.getName() == name) {
+				return t;
+			}
+		}
+		return null;		
+	}
 
 }
