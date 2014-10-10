@@ -158,6 +158,7 @@ public class NoEditSession implements CTFSession, Listener {
 			t.getGoal().setAccepting(false);
 			for (TeamPlayer tp : t.getTeamPlayers()) {
 				tp.moveLeave();
+				tp.setTeam(null);
 				tp.getPlayer().sendMessage("Game stopped!");
 				tp.getPlayer().sendMessage("Your team scored " + t.getScore() + "points! You scored " + tp.getPoints() + " of those!");
 				tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
