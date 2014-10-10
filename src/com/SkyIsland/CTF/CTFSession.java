@@ -28,6 +28,10 @@ public interface CTFSession {
 	
 	public String getName();
 	
+	public boolean hasTeam(String name);
+	
+	public CTFTeam getTeam(String name);
+	
 }
 
 

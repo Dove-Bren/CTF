@@ -121,7 +121,62 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			
 			team.removePlayer((Player) sender);
 			tp.setTeam(null);
-			
+			return true;
+		}
+		
+		if (command.equalsIgnoreCase("join")) {
+			if (args.length == 1) {
+				//specified only the team to join. join hte first
+				for (CTFSession s: sessions) {
+					if (s.hasTeam(args[0])) {
+						CTFTeam team = s.getTeam(args[0]);
+						team.addPlayer((Player) sender);
+						getTeamPlayer((Player) sender).setTeam(team);
+						sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
+						return true;
+					}
+				}
+				//never returned so never found that team
+				sender.sendMessage("Could not find a team with that name! Try using /lteams to see all available teams");
+				return true;
+			}
+			else if (args.length == 2) {
+				//arg 1 is session, arg 2 is team 
+				CTFSession session = null;
+				CTFTeam team = null;
+				//first try and get the session.
+				for (CTFSession s : sessions) {
+					if (s.getName() == args[0]) {
+						//found the sesson
+						session = s;
+						break;
+					}
+				}
+				
+				//make sure we found the sesson
+				if (session == null) {
+					sender.sendMessage("Could not find the session " + args[0] + "!");
+					return false;
+				}
+				
+				//we found the session, so try and find the team
+				team = session.getTeam(args[1]);
+				if (team == null) {
+					sender.sendMessage("Could not find the team " + args[1] + "!");
+					return false;
+				}
+				
+				//found both the session and team
+				team.addPlayer((Player) sender);
+				getTeamPlayer((Player) sender).setTeam(team);
+				sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + session.getName() + "]!");
+
+				return true;
+			}
+			else {
+				//invalid argument cound
+				return false;
+			}
 		}
 		
 		
