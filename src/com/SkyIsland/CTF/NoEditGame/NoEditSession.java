@@ -128,7 +128,7 @@ public class NoEditSession implements CTFSession, Listener {
 			}
 		}
 		
-		if (team != null && team.getGoal().isInGoal(event.getTo())) {
+		if (team.getGoal() != null && (team != null && team.getGoal().isInGoal(event.getTo()))) {
 			//goal
 		}
 		
