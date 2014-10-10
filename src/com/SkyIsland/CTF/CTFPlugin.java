@@ -10,7 +10,10 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -368,9 +371,10 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 	public boolean onCTFTeamCommand(CommandSender sender, Command cmd, String label, String[] args){
 		//we can create teams or remove teams
 		if (args.length == 1) {
-			sender.sendMessage("/cf team [create/remove/spawn/flag/goal]");
+			sender.sendMessage("/cf team [create/remove/spawn/flag/goal/chest]");
 			return true; //no /ctf team   command
 		}
+		
 		if (args[1].equalsIgnoreCase("create")) {
 			//it'll be /ctf team create [session] [name] [color]
 			if (args.length != 5) {
@@ -414,6 +418,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			sender.sendMessage("Team named [" + team.getName() + "] created on session [" + session.getName() + "]!");
 			return true;
 		}
+		
 		else if (args[1].equalsIgnoreCase("remove")) {
 			//it'll be /ctf team remove session team
 			if (args.length != 4) {
@@ -691,6 +696,55 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			
 			sender.sendMessage("set the goal for team " + team.getName());
 			return true;						
+		}
+		else if (args[1].equalsIgnoreCase("chest")) {
+			//it will be
+			///ctf team chest session teamname world x y z
+			if (args.length != 8){
+				sender.sendMessage("/cf team chest [session name] [team name] [world] [x] [y] [z]");
+				return true; 
+			}
+			
+			CTFSession session = null;
+			CTFTeam team;
+				
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+				
+			if (session == null) {
+				sender.sendMessage("Unable to find session with the name " + args[2]);
+				return true;
+			}
+				
+			//now get the team
+			team = session.getTeam(args[3]);
+				
+			if (team == null) {
+				sender.sendMessage("Unable to find team with the name " + args[3]);
+				return true;
+			}
+			
+			World world = Bukkit.getWorld(args[4]);
+			Integer x = Integer.parseInt(args[5]);
+			Integer y = Integer.parseInt(args[6]);
+			Integer z = Integer.parseInt(args[7]);
+			
+			Location loc = new Location(world, x, y, z);
+			
+			Block block = loc.getBlock();
+			if (!block.getType().equals(Material.CHEST)){
+				sender.sendMessage("Not a chest");
+				return true;
+			}
+			
+			Chest chest = (Chest) block.getState();
+			team.setInventory(chest.getInventory());
+			
+			return true;
 		}
 		
 		return false;

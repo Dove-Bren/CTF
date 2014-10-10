@@ -14,6 +14,7 @@ import org.bukkit.Material;
 
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Wool;
@@ -36,7 +37,7 @@ public class NoEditTeam implements CTFTeam {
 	private Score teamScore;
 	
 	public NoEditSession session;
-	
+	private Inventory inventory;
 	//Constructors
 	
 	/**
@@ -179,6 +180,17 @@ public class NoEditTeam implements CTFTeam {
 			}
 			//Remove inventory
 			e.getEntity().getInventory().clear();
+			
+			//Reset inventory
+			TeamPlayer tp = CTFPlugin.getTeamPlayer(e.getEntity());
+			CTFTeam team = tp.getTeam();
+			if (team.getInventory() != null){
+				for (ItemStack i: team.getInventory()){
+					if (i != null){
+						tp.getPlayer().getInventory().addItem(i.clone());
+					}
+				}
+			}
 		}
 	}
 	
@@ -265,5 +277,15 @@ public class NoEditTeam implements CTFTeam {
 	@Override
 	public List<TeamPlayer> getTeamPlayers() {
 		return this.teamPlayers;
+	}
+
+	@Override
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
+	}
+
+	@Override
+	public Inventory getInventory() {
+		return this.inventory;
 	}
 }

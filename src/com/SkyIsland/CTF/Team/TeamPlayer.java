@@ -5,6 +5,8 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class TeamPlayer {
 	
@@ -82,7 +84,17 @@ public class TeamPlayer {
 			return;
 		}
 		
-		player.teleport(spawnLocs.get(  rand.nextInt(spawnLocs.size())          ));
+		player.teleport(spawnLocs.get(  rand.nextInt(spawnLocs.size())));
+		Inventory playerInventory = player.getInventory();
+		playerInventory.clear();
+		if (team.getInventory() != null){
+			for (ItemStack i: team.getInventory()){
+				if (i != null){
+					playerInventory.addItem(i.clone());
+				}
+			}
+		}
+		
 	}
 	
 	/**

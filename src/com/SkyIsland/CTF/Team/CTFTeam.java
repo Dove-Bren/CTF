@@ -3,11 +3,13 @@ package com.SkyIsland.CTF.Team;
 import java.util.List;
 
 
+
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 
 /**
  * This interface is for containing one CTF team and it's attributes. All these methods must be implemented correctly
@@ -62,6 +64,7 @@ public interface CTFTeam {
 	
 	public void setTeamPlayers(List<TeamPlayer> list);
 
-	
+	public void setInventory(Inventory inventory);
+	public Inventory getInventory();
 	
 }
