@@ -1,14 +1,18 @@
 package com.SkyIsland.CTF;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.SkyIsland.CTF.Team.CTFTeam;
+import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 public class CTFPlugin extends JavaPlugin {
@@ -17,18 +21,24 @@ public class CTFPlugin extends JavaPlugin {
 	public static WorldEditPlugin weplugin;
 	private List<CTFSession> sessions;
 	
+	private Map<Player, TeamPlayer> playerMap;
+	
 	public void onLoad() {
 		
 	}
 	
 	public void onEnable() {
 		sessions = new LinkedList<CTFSession>();
+		playerMap = new HashMap<Player, TeamPlayer>();
 		CTFPlugin.plugin = this;
 		CTFPlugin.weplugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
 	}
 	
 	public void onDisable() {
-		
+		sessions.clear();
+		sessions = null;
+		playerMap.clear();
+		playerMap = null;
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -82,6 +92,10 @@ public class CTFPlugin extends JavaPlugin {
 				sender.sendMessage(msg);
 			}
 			return true;
+		}
+		
+		if (command.equalsIgnoreCase("leave")) {
+			
 		}
 		
 		

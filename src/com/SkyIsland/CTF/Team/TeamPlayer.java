@@ -8,6 +8,8 @@ public class TeamPlayer {
 	
 	private boolean hasFlag;
 	
+	private CTFTeam team;
+	
 	
 	
 	
@@ -24,6 +26,10 @@ public class TeamPlayer {
 	
 	public boolean hasFlag() {
 		return this.hasFlag;
+	}
+	
+	public CTFTeam getTeam() {
+		return this.team;
 	}
 	
 	
