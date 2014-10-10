@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 
 
+
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.Goal;
 import com.SkyIsland.CTF.Team.TeamPlayer;
@@ -21,15 +22,6 @@ public class NoEditTeam implements CTFTeam {
 	private Location SpawnLocation;
 	
 	//Constructors
-	/**
-	 * This is the default constructor, nothing is specified
-	 */
-	public NoEditTeam() {
-		Players = new LinkedList<Player>();
-		this.score = 0;
-		setgoal(null);
-		setSpawn(null);
-	}
 	
 	/**
 	 * This constructor allows for specification of the Team name
@@ -142,6 +134,11 @@ public class NoEditTeam implements CTFTeam {
 	public TeamPlayer getTeamPlayer(Player player) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getName() {
+		return this.TeamName;
 	}
 	
 }

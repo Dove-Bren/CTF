@@ -26,6 +26,8 @@ public interface CTFSession {
 	
 	public void stop();
 	
+	public String getName();
+	
 }
 
 

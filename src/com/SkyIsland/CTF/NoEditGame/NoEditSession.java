@@ -19,11 +19,13 @@ public class NoEditSession implements CTFSession, Listener {
 
 	private List<CTFTeam> Teams;
 	private boolean running;
+	private String name;
 	
 	/**
 	 * Default constructor for a No Edit Game Session
 	 */
-	public NoEditSession() {
+	public NoEditSession(String name) {
+		this.name = name;
 		this.Teams = new LinkedList<CTFTeam>();
 		Bukkit.getPluginManager().registerEvents(this, CTFPlugin.plugin);
 	}
@@ -32,7 +34,8 @@ public class NoEditSession implements CTFSession, Listener {
 	 * This constructor allows for specification of Teams
 	 * @param Teams The Teams to be added to the session
 	 */
-	public NoEditSession(List<CTFTeam> Teams) {
+	public NoEditSession(String name, List<CTFTeam> Teams) {
+		this.name = name;
 		this.Teams = Teams;
 	}
 	
@@ -122,6 +125,11 @@ public class NoEditSession implements CTFSession, Listener {
 		}
 		
 		
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
 	}
 	
 

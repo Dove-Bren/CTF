@@ -39,6 +39,8 @@ public interface CTFTeam {
 	public boolean inTeam(Player player);
 	
 	public TeamPlayer getTeamPlayer(Player player);
+	
+	public String getName();
 
 	//ADD public setRespawn();
 	
