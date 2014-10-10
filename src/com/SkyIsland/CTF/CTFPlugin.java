@@ -451,15 +451,11 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		else if (args[1].equalsIgnoreCase("spawn")) {
 			//set a player spawn point for this time
 			//can be /ctf team spawn add [session] [team],   ---
-			if (args.length != 5) {
+			if (args.length != 5 && args.length != 9 && args.length != 12) {
 				sender.sendMessage("/cf team spawn [\"add\"] [session name] [team name]");
 				return true; 
 			}
-			//these also usea selection, which is only made by a player
-			if (!(sender instanceof Player)) {
-				sender.sendMessage("Only players are able to use this command!");
-				return true;
-			}
+			
 			if (args[2].equalsIgnoreCase("add")) {
 				//get session
 				CTFSession session = null;
@@ -485,16 +481,42 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					return true;
 				}
 				
-				Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-				if (selection == null || selection.getArea() == 0) {
-					//player has nothing selected
-					sender.sendMessage("You must select 1 more more blocks to set as a spawn point!");
-					return true;
-				}
-				//haz selection
-
+				Location max = null, min = null;
 				
-				Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+				if (args.length == 5){
+					if (!(sender instanceof Player)) {
+						sender.sendMessage("Only players are able to use this command!");
+						return true;
+					}
+					Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+					if (selection == null || selection.getArea() == 0) {
+						//player has nothing selected
+						sender.sendMessage("You must select 1 more more blocks to set as a spawn point!");
+						return true;
+					}
+					max = selection.getMaximumPoint();
+					min = selection.getMinimumPoint();
+
+				}
+				else if (args.length == 9){
+					World world = Bukkit.getWorld(args[5]);
+					Integer x = Integer.parseInt(args[6]);
+					Integer y = Integer.parseInt(args[7]);
+					Integer z = Integer.parseInt(args[8]);
+					max = min = new Location(world, x, y, z);
+				}
+				else if (args.length == 12){
+					World world = Bukkit.getWorld(args[5]);
+					Integer x = Integer.parseInt(args[6]);
+					Integer y = Integer.parseInt(args[7]);
+					Integer z = Integer.parseInt(args[8]);
+					Integer x2 = Integer.parseInt(args[9]);
+					Integer y2 = Integer.parseInt(args[10]);
+					Integer z2 = Integer.parseInt(args[11]);
+					min = new Location(world, Math.min(x, x2), Math.min(y, y2), Math.min(z, z2));
+					max = new Location(world, Math.max(x, x2), Math.max(y, y2), Math.max(z, z2));					
+				}	
+				
 				World world = max.getWorld();
 				for (int i = min.getBlockX(); i <= max.getBlockX(); i++) {
 				for (int j = min.getBlockY(); j <= max.getBlockY(); j++) {
@@ -507,14 +529,9 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		}
 		else if (args[1].equalsIgnoreCase("flag")) {
 			//it'll be /ctf team flag add [session] [team]
-			if (args.length != 5) {
+			if (args.length != 5 && args.length != 9 && args.length != 12) {
 				sender.sendMessage("/cf team flag [\"add\"] [session name] [team name]");
 				return true; 
-			}
-			//this also uses selection, which is only made by a player
-			if (!(sender instanceof Player)) {
-				sender.sendMessage("Only players are able to use this command!");
-				return true;
 			}
 			
 			if (args[2].equalsIgnoreCase("add")) {
@@ -542,14 +559,45 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					return true;
 				}
 				
-				//team and session are both good. 
-				Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-				if (selection == null || selection.getArea() == 0) {
-					sender.sendMessage("You must select an area to set as a flag spawning location!");
-					return true;
+				Location min = null, max = null;
+				
+				if (args.length == 5){
+					//this also uses selection, which is only made by a player
+					if (!(sender instanceof Player)) {
+						sender.sendMessage("Only players are able to use this command!");
+						return true;
+					}
+					
+					//team and session are both good. 
+					Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+					if (selection == null || selection.getArea() == 0) {
+						sender.sendMessage("You must select an area to set as a flag spawning location!");
+						return true;
+					}
+					
+					max = selection.getMaximumPoint();
+					min = selection.getMinimumPoint();
 				}
 				
-				Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+				else if (args.length == 9){
+					World world = Bukkit.getWorld(args[5]);
+					Integer x = Integer.parseInt(args[6]);
+					Integer y = Integer.parseInt(args[7]);
+					Integer z = Integer.parseInt(args[8]);
+					max = min = new Location(world, x, y, z);
+				}
+				else if (args.length == 12){
+					World world = Bukkit.getWorld(args[5]);
+					Integer x = Integer.parseInt(args[6]);
+					Integer y = Integer.parseInt(args[7]);
+					Integer z = Integer.parseInt(args[8]);
+					Integer x2 = Integer.parseInt(args[9]);
+					Integer y2 = Integer.parseInt(args[10]);
+					Integer z2 = Integer.parseInt(args[11]);
+					min = new Location(world, Math.min(x, x2), Math.min(y, y2), Math.min(z, z2));
+					max = new Location(world, Math.max(x, x2), Math.max(y, y2), Math.max(z, z2));					
+				}
+				
 				World world = max.getWorld();
 				for (int i = min.getBlockX(); i <= max.getBlockX(); i++)
 				for (int j = min.getBlockY(); j <= max.getBlockY(); j++)
@@ -563,15 +611,11 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		}
 		else if (args[1].equalsIgnoreCase("goal")) {
 			//it'll be /ctf team flag add [session] [team]
-			if (args.length != 4) {
+			if (args.length != 4 && args.length != 8 && args.length != 11) {
 				sender.sendMessage("/cf team goal [session name] [team name]");
 				return true; 
 			}
-			//this also uses selection, which is only made by a player
-			if (!(sender instanceof Player)) {
-				sender.sendMessage("Only players are able to use this command!");
-				return true;
-			}
+			
 			
 			CTFSession session = null;
 			CTFTeam team;
@@ -595,20 +639,46 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				sender.sendMessage("Unable to find team with the name " + args[3]);
 				return true;
 			}
+			
+			Location min = null, max = null;
+			
+			if (args.length == 4){
+				//this also uses selection, which is only made by a player
+				if (!(sender instanceof Player)) {
+					sender.sendMessage("Only players are able to use this command!");
+					return true;
+				}
 				
-			//team and session are both good. 
-			Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-			if (selection == null || selection.getArea() == 0) {
-				sender.sendMessage("You must select an area to set as a goal!");
-				return true;
+				//team and session are both good. 
+				Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+				if (selection == null || selection.getArea() == 0) {
+					sender.sendMessage("You must select an area to set as a goal!");
+					return true;
+				}
+				
+				min = selection.getMinimumPoint();
+				max = selection.getMaximumPoint();
 			}
 			
+			else if (args.length == 8){
+				World world = Bukkit.getWorld(args[4]);
+				Integer x = Integer.parseInt(args[5]);
+				Integer y = Integer.parseInt(args[6]);
+				Integer z = Integer.parseInt(args[7]);
+				max = min = new Location(world, x, y, z);
+			}
+			else if (args.length == 11){
+				World world = Bukkit.getWorld(args[4]);
+				Integer x = Integer.parseInt(args[5]);
+				Integer y = Integer.parseInt(args[6]);
+				Integer z = Integer.parseInt(args[7]);
+				Integer x2 = Integer.parseInt(args[8]);
+				Integer y2 = Integer.parseInt(args[9]);
+				Integer z2 = Integer.parseInt(args[10]);
+				min = new Location(world, Math.min(x, x2), Math.min(y, y2), Math.min(z, z2));
+				max = new Location(world, Math.max(x, x2), Math.max(y, y2), Math.max(z, z2));					
+			}	
 			
-			//NoEditGoal goal = new NoEditGoal(selection);
-			//Region region = CTFPlugin.wgplugin.getRegionManager();
-			Location min, max;
-			min = selection.getMinimumPoint();
-			max = selection.getMaximumPoint();
 			com.sk89q.worldedit.Vector minV, maxV;
 			minV = new com.sk89q.worldedit.Vector(min.getX(), min.getY(), min.getZ());
 			maxV = new com.sk89q.worldedit.Vector(max.getX(), max.getY(), max.getZ());

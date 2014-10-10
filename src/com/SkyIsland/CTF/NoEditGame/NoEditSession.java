@@ -165,7 +165,7 @@ public class NoEditSession implements CTFSession, Listener {
 			}
 		}		
 		
-		scoreboard = null;
+		scoreboard.clearSlot(DisplaySlot.SIDEBAR);
 
 	}
 	

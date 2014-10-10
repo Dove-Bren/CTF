@@ -76,7 +76,6 @@ public class TeamPlayer {
 	 */
 	public void spawn() {
 		List<Location> spawnLocs = team.getSpawnLocations();
-		
 		if (spawnLocs == null || spawnLocs.isEmpty()) {
 			player.sendMessage("You were not able to be spawned because no spawn locations for your team"
 					+ " were set. Please inform the admin.");
