@@ -100,6 +100,27 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		}
 		
 		if (command.equalsIgnoreCase("leave")) {
+			if (!(sender instanceof Player)) {
+				sender.sendMessage("Only players can execute this command!");
+				return true;
+			}
+			TeamPlayer tp = getTeamPlayer((Player) sender);
+			if (tp == null) {
+				//didn't have a teamPlayer...?
+				sender.sendMessage("<REGERR> You have left your team!");
+				hashPlayer((Player) sender);
+				return true;
+			}
+			
+			CTFTeam team = tp.getTeam();
+			
+			if (team == null) {
+				sender.sendMessage("You're not in a team!");
+				return true;
+			}
+			
+			team.removePlayer((Player) sender);
+			tp.setTeam(null);
 			
 		}
 		
@@ -141,6 +162,10 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		playerMap.put(player.getUniqueId(), new TeamPlayer(player));
 	}
 	
+	/**
+	 * Called when a player joins the world. This created a TeamPlayer for them and updates the hashmap.
+	 * @param event
+	 */
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event) {
 		hashPlayer(event.getPlayer());
