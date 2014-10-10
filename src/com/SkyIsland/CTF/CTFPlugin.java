@@ -142,6 +142,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			}
 			
 			team.removePlayer(tp);
+			tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 			sender.sendMessage("You have left your team.");
 			if (team.getGoal() != null && team.getGoal().isAccepting()) {
 				//session still going on. Teleport them out

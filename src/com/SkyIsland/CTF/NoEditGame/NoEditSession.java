@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +14,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.CTFSession;
@@ -54,11 +52,8 @@ public class NoEditSession implements CTFSession, Listener {
 		obj.setDisplayName("Points");
 		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 		for (CTFTeam team : Teams) {
-			Team scoreTeam = scoreboard.registerNewTeam(team.getName());
-			scoreTeam.setPrefix(ChatColor.BOLD + name + ChatColor.RESET);
 			scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(team.getName()).setScore(0);
 			for (TeamPlayer tp : team.getTeamPlayers()) {
-				scoreTeam.addPlayer(tp.getPlayer());
 				tp.getPlayer().setScoreboard(scoreboard);
 			}
 		}
@@ -81,8 +76,8 @@ public class NoEditSession implements CTFSession, Listener {
 		Score score = scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(name);
 		CTFTeam team = new NoEditTeam(name, score);
 		Teams.add(team);
-		scoreboard.registerNewTeam(name).setPrefix(ChatColor.DARK_PURPLE + "| " + name + ChatColor.RESET);
-		scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(team.getName()).setScore(0);
+		score.setScore(1);
+		score.setScore(0);
 		return team;
 	}
 
@@ -98,14 +93,12 @@ public class NoEditSession implements CTFSession, Listener {
 		score = scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(name);
 		team = new NoEditTeam(name, score);
 		this.Teams.add(team);
-		scoreboard.registerNewTeam(name).setPrefix(ChatColor.BOLD + name + ChatColor.RESET);
-		scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(team.getName()).setScore(0);
+		score.setScore(1);
+		score.setScore(0);
 		team.setTeamPlayers(players);
 		//we gotta give each player the scoreboard
-		Team scoreTeam = scoreboard.getTeam(team.getName());
 		if (players != null && !players.isEmpty())
 		for (TeamPlayer tp : players) {
-			scoreTeam.addPlayer(tp.getPlayer());
 			tp.getPlayer().setScoreboard(scoreboard);
 		}
 		
@@ -117,7 +110,7 @@ public class NoEditSession implements CTFSession, Listener {
 	public void removeTeam(CTFTeam team) {
 		if (Teams.contains(team)) {
 			Teams.remove(team);
-			scoreboard.getTeam(team.getName()).unregister();
+			scoreboard.resetScores(team.getName());
 		}
 	}
 
@@ -125,11 +118,6 @@ public class NoEditSession implements CTFSession, Listener {
 	public void addPlayer(CTFTeam team, TeamPlayer player) {
 		if (Teams.contains(team)) {//only add if this session has that team???
 			team.addPlayer(player);
-			scoreboard.getTeam(team.getName()).addPlayer(player.getPlayer());
-			scoreboard.
-			getObjective(DisplaySlot.SIDEBAR)
-			.getScore(player.getPlayer().getDisplayName())
-			.setScore(0);
 			player.getPlayer().setScoreboard(scoreboard);
 		}
 	}
@@ -138,7 +126,6 @@ public class NoEditSession implements CTFSession, Listener {
 	public void removePlayer(CTFTeam team, TeamPlayer player) {
 		if (Teams.contains(team)) {
 			team.removePlayer(player);
-			scoreboard.getTeam(team.getName()).removePlayer(player.getPlayer());
 			player.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 		}
 	}
