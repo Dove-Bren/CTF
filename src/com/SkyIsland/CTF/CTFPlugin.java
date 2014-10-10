@@ -72,533 +72,555 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		String command = cmd.getName();
 		
 		if (command.equalsIgnoreCase("lteams")) {
-			//First, are there any sessions or teams?
-			if (sessions.size() == 0) {
-				sender.sendMessage("There are currently no sessions.");
-				return true;
-			}
-			
-			//list the teams available to join. If they don't specify a session, list all sessions and teams
-			if (args.length > 0) {
-				//they passes a session?
-				String sessionName = args[0];
-				CTFSession session = null;
-				for (CTFSession s : sessions) {
-					if (s.getName() == sessionName) {
-						session = s;
-						break;
-					}
-				}
-				if (session != null) {
-					String msg = "Teams: ";
-					for (CTFTeam t : session.getTeams()) {
-						msg += t.getName() + " | ";
-					}
-					sender.sendMessage(msg);
-					return true;
-				}
-				else {
-					//no session by that name.
-					String msg = "";
-					for (CTFSession s: sessions) {
-						msg += s.getName() + " | ";
-					}
-					sender.sendMessage("No valid session exists with that name. Valid sessions: " + msg);
-					return true;
+			return onLteamsCommand(sender, cmd, label, args);
+		}
+		else if (command.equalsIgnoreCase("leave")) {
+			return onLeaveCommand(sender, cmd, label, args);
+		}
+		else if (command.equalsIgnoreCase("join")) {
+			return onJoinCommand(sender, cmd, label, args);
+		}
+		else if (command.equalsIgnoreCase("capturetheflag") || command.equalsIgnoreCase("cf") || command.equalsIgnoreCase("ctf")) {
+			return onCTFCommand(sender, cmd, label, args);
+		}
+		return false;
+	}
+	
+	public boolean onLteamsCommand(CommandSender sender, Command cmd, String label, String[] args){
+		//First, are there any sessions or teams?
+		if (sessions.size() == 0) {
+			sender.sendMessage("There are currently no sessions.");
+			return true;
+		}
+		
+		//list the teams available to join. If they don't specify a session, list all sessions and teams
+		if (args.length > 0) {
+			//they passes a session?
+			String sessionName = args[0];
+			CTFSession session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName() == sessionName) {
+					session = s;
+					break;
 				}
 			}
-			//args == 0
-			//no session passed. Just list all teams with their respective session names
-			String msg;
-			for (CTFSession s: sessions) {
-				msg = s.getName() + ":   ";
-				for (CTFTeam t: s.getTeams()) {
+			if (session != null) {
+				String msg = "Teams: ";
+				for (CTFTeam t : session.getTeams()) {
 					msg += t.getName() + " | ";
 				}
 				sender.sendMessage(msg);
-			}
-			return true;
-		}
-		
-		if (command.equalsIgnoreCase("leave")) {
-			if (!(sender instanceof Player)) {
-				sender.sendMessage("Only players can execute this command!");
 				return true;
 			}
-			TeamPlayer tp = getTeamPlayer((Player) sender);
-			if (tp == null) {
-				//didn't have a teamPlayer...?
-				sender.sendMessage("<REGERR> You have left your team!");
-				hashPlayer((Player) sender);
-				return true;
-			}
-			
-			CTFTeam team = tp.getTeam();
-			
-			if (team == null) {
-				sender.sendMessage("You're not in a team!");
-				return true;
-			}
-			
-			team.removePlayer(tp);
-			tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-			sender.sendMessage("You have left your team.");
-			if (team.getGoal() != null && team.getGoal().isAccepting()) {
-				//session still going on. Teleport them out
-				tp.moveLeave(); //to 0,0,0 for now :( 
-				//TODO SUPER IMPORTANT
-			}
-			return true;
-		}
-		
-		if (command.equalsIgnoreCase("join")) {
-			if (args.length == 1) {
-				//specified only the team to join. join hte first
+			else {
+				//no session by that name.
+				String msg = "";
 				for (CTFSession s: sessions) {
-					if (s.hasTeam(args[0])) {
-						CTFTeam team = s.getTeam(args[0]);
-						s.addPlayer(team, getTeamPlayer((Player) sender));
-						
-						sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
-						return true;
-					}
+					msg += s.getName() + " | ";
 				}
-				//never returned so never found that team
-				sender.sendMessage("Could not find a team with the name " + args[0] + "! Try using /lteams to see all available teams");
+				sender.sendMessage("No valid session exists with that name. Valid sessions: " + msg);
 				return true;
 			}
-			else if (args.length == 2) {
-				//arg 1 is session, arg 2 is team 
+		}
+		//args == 0
+		//no session passed. Just list all teams with their respective session names
+		String msg;
+		for (CTFSession s: sessions) {
+			msg = s.getName() + ":   ";
+			for (CTFTeam t: s.getTeams()) {
+				msg += t.getName() + " | ";
+			}
+			sender.sendMessage(msg);
+		}
+		return true;
+	}
+	
+	public boolean onLeaveCommand(CommandSender sender, Command cmd, String label, String[] args){
+		if (!(sender instanceof Player)) {
+			sender.sendMessage("Only players can execute this command!");
+			return true;
+		}
+		TeamPlayer tp = getTeamPlayer((Player) sender);
+		if (tp == null) {
+			//didn't have a teamPlayer...?
+			sender.sendMessage("<REGERR> You have left your team!");
+			hashPlayer((Player) sender);
+			return true;
+		}
+		
+		CTFTeam team = tp.getTeam();
+		
+		if (team == null) {
+			sender.sendMessage("You're not in a team!");
+			return true;
+		}
+		
+		team.removePlayer(tp);
+		tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+		sender.sendMessage("You have left your team.");
+		if (team.getGoal() != null && team.getGoal().isAccepting()) {
+			//session still going on. Teleport them out
+			tp.moveLeave(); //to 0,0,0 for now :( 
+			//TODO SUPER IMPORTANT
+		}
+		return true;
+	}
+	public boolean onJoinCommand(CommandSender sender, Command cmd, String label, String[] args){
+		if (args.length == 1) {
+			//specified only the team to join. join hte first
+			for (CTFSession s: sessions) {
+				if (s.hasTeam(args[0])) {
+					CTFTeam team = s.getTeam(args[0]);
+					s.addPlayer(team, getTeamPlayer((Player) sender));
+					
+					sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
+					return true;
+				}
+			}
+			//never returned so never found that team
+			sender.sendMessage("Could not find a team with the name " + args[0] + "! Try using /lteams to see all available teams");
+			return true;
+		}
+		else if (args.length == 2) {
+			//arg 1 is session, arg 2 is team 
+			CTFSession session = null;
+			CTFTeam team = null;
+			//first try and get the session.
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[0])) {
+					//found the sesson
+					session = s;
+					break;
+				}
+			}
+			
+			//make sure we found the sesson
+			if (session == null) {
+				sender.sendMessage("Could not find the session " + args[0] + "!");
+				return true;
+			}
+			
+			//we found the session, so try and find the team
+			team = session.getTeam(args[1]);
+			if (team == null) {
+				sender.sendMessage("Could not find the team " + args[1] + "!");
+				return true;
+			}
+			
+			//found both the session and team
+			team.addPlayer(getTeamPlayer((Player) sender));
+			sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + session.getName() + "]!");
+
+			return true;
+		}
+		else {
+			//invalid argument cound
+			return false;
+		}
+	}
+	
+	public boolean onCTFCommand(CommandSender sender, Command cmd, String label, String[] args){
+		
+		//admin command. commands are: session, team
+		if (args.length == 0) {
+			return false; //no just ctf command
+		}
+		
+		if (args[0].equalsIgnoreCase("session")) {
+			return onCTFSessionCommand(sender, cmd, label, args);
+		}
+		else if (args[0].equalsIgnoreCase("team")) {
+			return onCTFTeamCommand(sender, cmd, label, args);
+		}
+		
+		return false;
+	}
+	
+	public boolean onCTFSessionCommand(CommandSender sender, Command cmd, String label, String[] args){
+		//what to do with session. We cant create one, delete one, start one, or end one
+		if (args.length == 1) {
+			sender.sendMessage("/cf session [create/remove/start/stop]");
+			return true; //no /ctf session command
+		}
+		if (args[1].equalsIgnoreCase("create")) {
+			//going to create one. Need to pass a type
+			if (args.length < 4) {
+				sender.sendMessage("/cf session create [type] [name]");
+				return true; //need at least 4: session, create, type, name
+			}
+			Class<? extends CTFSession> sesClass = CTFTypes.getSession(args[2]);
+			if (sesClass == null) {
+				//couldn't find that kind of session
+				sender.sendMessage("Invalid session type!");
+				return true;
+			}
+			
+			CTFSession session = null;
+			try {
+				session = sesClass.getConstructor(String.class).newInstance(args[3]);
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (session == null) {
+				sender.sendMessage("Unable to instantiate the session...");
+				return true;
+			}
+			
+			sessions.add(session);
+			sender.sendMessage("Session <" + session.getName() + "> created!");
+			return true;
+			
+		}
+		else if (args[1].equalsIgnoreCase("start")) {
+			if (args.length != 3) {
+				sender.sendMessage("/cf session start [session name]");
+				return true; //has to be /ctf session start <session>
+			}
+			CTFSession session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+			if (session == null) {
+				//diddn't find a session with that name
+				sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
+				return true;
+			}
+			session.start();
+			return true;
+		}
+		else if (args[1].equalsIgnoreCase("stop")) {
+			if (args.length != 3) {
+				sender.sendMessage("/cf session stop [session name]");
+				return true; //has to be /ctf session stop <session>
+			}
+			CTFSession session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+			if (session == null) {
+				//diddn't find a session with that name
+				sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
+				return true;
+			}
+			session.stop();
+			return true;
+		}
+		else if (args[1].equalsIgnoreCase("remove")) {
+			if (args.length != 3) {
+				sender.sendMessage("/cf session remove [session name]");
+				return true; //has to be ctf session remove <session>
+			}
+			CTFSession session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+			if (session == null) {
+				//diddn't find a session with that name
+				sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
+				return true;
+			}
+
+			if (session.isRunning()) {
+				session.stop();
+			}
+			//remove all teams
+			if (!session.getTeams().isEmpty()) 
+			for (CTFTeam t : session.getTeams()) {
+				for (TeamPlayer tp : t.getTeamPlayers()) {
+					tp.setTeam(null);
+					tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+				}
+			}
+			sessions.remove(session);
+			sender.sendMessage("Session " + session.getName() + " removed!");
+			return true;
+		}
+		return false;
+		
+	}
+	
+	public boolean onCTFTeamCommand(CommandSender sender, Command cmd, String label, String[] args){
+		//we can create teams or remove teams
+		if (args.length == 1) {
+			sender.sendMessage("/cf team [create/remove/spawn/flag/goal]");
+			return true; //no /ctf team   command
+		}
+		if (args[1].equalsIgnoreCase("create")) {
+			//it'll be /ctf team create [session] [name] [color]
+			if (args.length != 5) {
+				//we don't have the right number of arguments
+				sender.sendMessage("/cf team create [session name] [team name] [team color]");
+				return true; 
+			}
+			
+			//find the team specified
+			CTFSession session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+			if (session == null) {
+				sender.sendMessage("Failed to find a session by the name " + args[2]);
+				return true;
+			}
+			
+			//make sure a team with that name doesn't exist
+			if (session.hasTeam(args[3])) {
+				sender.sendMessage("A team with that name in this session already exists!");
+				return true;
+			}
+			
+			//try and get that color					
+			DyeColor color = null;
+			try {
+				color = DyeColor.valueOf(args[4].toUpperCase());
+			}
+			catch (IllegalArgumentException e) {
+				sender.sendMessage("Could not convert " + args[4].toUpperCase() + " to a dye color!");
+				return true;
+			}
+			
+			CTFTeam team = session.createTeam(args[3]);
+			team.setColor(color);
+			sender.sendMessage("Team named [" + team.getName() + "] created on session [" + session.getName() + "]!");
+			return true;
+		}
+		else if (args[1].equalsIgnoreCase("remove")) {
+			//it'll be /ctf team remove session team
+			if (args.length != 4) {
+				sender.sendMessage("/cf team remove [session name] [team name]");
+				return true; 
+			}
+			CTFSession session;
+			CTFTeam team;
+			session = null;
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+			if (session == null) {
+				sender.sendMessage("Could not find a session by the name " + args[2]);
+				return true;
+			}
+			
+			team = session.getTeam(args[3]);
+			if (team == null) {
+				sender.sendMessage("Could not find a team by the name " + args[3]);
+			}
+			
+			//got hte session and team
+			//reset all players in that team
+			for (TeamPlayer tp : team.getTeamPlayers()) {
+				tp.setTeam(null);
+				tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+			}
+			session.removeTeam(team);
+			sender.sendMessage("Removed the team [" + team.getName() + "] from session [" + session.getName() + "]!");
+			return true;
+		}
+		else if (args[1].equalsIgnoreCase("spawn")) {
+			//set a player spawn point for this time
+			//can be /ctf team spawn add [session] [team],   ---
+			if (args.length != 5) {
+				sender.sendMessage("/cf team spawn [\"add\"] [session name] [team name]");
+				return true; 
+			}
+			//these also usea selection, which is only made by a player
+			if (!(sender instanceof Player)) {
+				sender.sendMessage("Only players are able to use this command!");
+				return true;
+			}
+			if (args[2].equalsIgnoreCase("add")) {
+				//get session
 				CTFSession session = null;
 				CTFTeam team = null;
-				//first try and get the session.
 				for (CTFSession s : sessions) {
-					if (s.getName().equalsIgnoreCase(args[0])) {
-						//found the sesson
+					if (s.getName().equalsIgnoreCase(args[3])) {
 						session = s;
 						break;
 					}
 				}
 				
-				//make sure we found the sesson
 				if (session == null) {
-					sender.sendMessage("Could not find the session " + args[0] + "!");
+					sender.sendMessage("Unable to find session named " + args[3] + "!");
 					return true;
 				}
 				
-				//we found the session, so try and find the team
-				team = session.getTeam(args[1]);
+				//get the team
+				team = session.getTeam(args[4]);
+				
 				if (team == null) {
-					sender.sendMessage("Could not find the team " + args[1] + "!");
+					//never found that team
+					sender.sendMessage("Could not find a team by the name " + args[4]);
 					return true;
 				}
 				
-				//found both the session and team
-				team.addPlayer(getTeamPlayer((Player) sender));
-				sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + session.getName() + "]!");
+				Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+				if (selection == null || selection.getArea() == 0) {
+					//player has nothing selected
+					sender.sendMessage("You must select 1 more more blocks to set as a spawn point!");
+					return true;
+				}
+				//haz selection
 
+				
+				Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+				World world = max.getWorld();
+				for (int i = min.getBlockX(); i <= max.getBlockX(); i++) {
+				for (int j = min.getBlockY(); j <= max.getBlockY(); j++) {
+				for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
+					team.getSpawnLocations().add(new Location(world, i,j,k));
+				}}}
+				sender.sendMessage("Set all blocks as a spawn point");
 				return true;
 			}
-			else {
-				//invalid argument cound
-				return false;
-			}
 		}
-		
-		if (command.equalsIgnoreCase("capturetheflag") || command.equalsIgnoreCase("cf") || command.equalsIgnoreCase("ctf")) {
-			//admin command. commands are: session, team
-			if (args.length == 0) {
-				return false; //no just ctf command
+		else if (args[1].equalsIgnoreCase("flag")) {
+			//it'll be /ctf team flag add [session] [team]
+			if (args.length != 5) {
+				sender.sendMessage("/cf team flag [\"add\"] [session name] [team name]");
+				return true; 
+			}
+			//this also uses selection, which is only made by a player
+			if (!(sender instanceof Player)) {
+				sender.sendMessage("Only players are able to use this command!");
+				return true;
 			}
 			
-			if (args[0].equalsIgnoreCase("session")) {
-				//what to do with session. We cant create one, delete one, start one, or end one
-				if (args.length == 1) {
-					sender.sendMessage("/cf session [create/remove/start/stop]");
-					return true; //no /ctf session command
+			if (args[2].equalsIgnoreCase("add")) {
+			
+				CTFSession session = null;
+				CTFTeam team;
+				
+				for (CTFSession s : sessions) {
+					if (s.getName().equalsIgnoreCase(args[3])) {
+						session = s;
+						break;
+					}
 				}
-				if (args[1].equalsIgnoreCase("create")) {
-					//going to create one. Need to pass a type
-					if (args.length < 4) {
-						sender.sendMessage("/cf session create [type] [name]");
-						return true; //need at least 4: session, create, type, name
-					}
-					Class<? extends CTFSession> sesClass = CTFTypes.getSession(args[2]);
-					if (sesClass == null) {
-						//couldn't find that kind of session
-						sender.sendMessage("Invalid session type!");
-						return true;
-					}
-					
-					CTFSession session = null;
-					try {
-						session = sesClass.getConstructor(String.class).newInstance(args[3]);
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (NoSuchMethodException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					if (session == null) {
-						sender.sendMessage("Unable to instantiate the session...");
-						return true;
-					}
-					
-					sessions.add(session);
-					sender.sendMessage("Session <" + session.getName() + "> created!");
-					return true;
-					
-				}
-				else if (args[1].equalsIgnoreCase("start")) {
-					if (args.length != 3) {
-						sender.sendMessage("/cf session start [session name]");
-						return true; //has to be /ctf session start <session>
-					}
-					CTFSession session = null;
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-					if (session == null) {
-						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
-						return true;
-					}
-					session.start();
-					return true;
-				}
-				else if (args[1].equalsIgnoreCase("stop")) {
-					if (args.length != 3) {
-						sender.sendMessage("/cf session stop [session name]");
-						return true; //has to be /ctf session stop <session>
-					}
-					CTFSession session = null;
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-					if (session == null) {
-						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
-						return true;
-					}
-					session.stop();
-					return true;
-				}
-				else if (args[1].equalsIgnoreCase("remove")) {
-					if (args.length != 3) {
-						sender.sendMessage("/cf session remove [session name]");
-						return true; //has to be ctf session remove <session>
-					}
-					CTFSession session = null;
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-					if (session == null) {
-						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + args[2] + " wasn't found!");
-						return true;
-					}
-
-					if (session.isRunning()) {
-						session.stop();
-					}
-					//remove all teams
-					if (!session.getTeams().isEmpty()) 
-					for (CTFTeam t : session.getTeams()) {
-						for (TeamPlayer tp : t.getTeamPlayers()) {
-							tp.setTeam(null);
-							tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-						}
-					}
-					sessions.remove(session);
-					sender.sendMessage("Session " + session.getName() + " removed!");
+				
+				if (session == null) {
+					sender.sendMessage("Unable to find session with the name " + args[3]);
 					return true;
 				}
 				
-			}
-			else if (args[0].equalsIgnoreCase("team")) {
-				//we can create teams or remove teams
-				if (args.length == 1) {
-					sender.sendMessage("/cf team [create/remove/spawn/flag/goal]");
-					return true; //no /ctf team   command
-				}
-				if (args[1].equalsIgnoreCase("create")) {
-					//it'll be /ctf team create [session] [name] [color]
-					if (args.length != 5) {
-						//we don't have the right number of arguments
-						sender.sendMessage("/cf team create [session name] [team name] [team color]");
-						return true; 
-					}
-					
-					//find the team specified
-					CTFSession session = null;
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-					if (session == null) {
-						sender.sendMessage("Failed to find a session by the name " + args[2]);
-						return true;
-					}
-					
-					//make sure a team with that name doesn't exist
-					if (session.hasTeam(args[3])) {
-						sender.sendMessage("A team with that name in this session already exists!");
-						return true;
-					}
-					
-					//try and get that color					
-					DyeColor color = null;
-					try {
-						color = DyeColor.valueOf(args[4].toUpperCase());
-					}
-					catch (IllegalArgumentException e) {
-						sender.sendMessage("Could not convert " + args[4].toUpperCase() + " to a dye color!");
-						return true;
-					}
-					
-					CTFTeam team = session.createTeam(args[3]);
-					team.setColor(color);
-					sender.sendMessage("Team named [" + team.getName() + "] created on session [" + session.getName() + "]!");
+				//now get the team
+				team = session.getTeam(args[4]);
+				
+				if (team == null) {
+					sender.sendMessage("Unable to find team with the name " + args[4]);
 					return true;
 				}
-				else if (args[1].equalsIgnoreCase("remove")) {
-					//it'll be /ctf team remove session team
-					if (args.length != 4) {
-						sender.sendMessage("/cf team remove [session name] [team name]");
-						return true; 
-					}
-					CTFSession session;
-					CTFTeam team;
-					session = null;
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-					if (session == null) {
-						sender.sendMessage("Could not find a session by the name " + args[2]);
-						return true;
-					}
-					
-					team = session.getTeam(args[3]);
-					if (team == null) {
-						sender.sendMessage("Could not find a team by the name " + args[3]);
-					}
-					
-					//got hte session and team
-					//reset all players in that team
-					for (TeamPlayer tp : team.getTeamPlayers()) {
-						tp.setTeam(null);
-						tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-					}
-					session.removeTeam(team);
-					sender.sendMessage("Removed the team [" + team.getName() + "] from session [" + session.getName() + "]!");
+				
+				//team and session are both good. 
+				Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+				if (selection == null || selection.getArea() == 0) {
+					sender.sendMessage("You must select an area to set as a flag spawning location!");
 					return true;
 				}
-				else if (args[1].equalsIgnoreCase("spawn")) {
-					//set a player spawn point for this time
-					//can be /ctf team spawn add [session] [team],   ---
-					if (args.length != 5) {
-						sender.sendMessage("/cf team spawn [\"add\"] [session name] [team name]");
-						return true; 
-					}
-					//these also usea selection, which is only made by a player
-					if (!(sender instanceof Player)) {
-						sender.sendMessage("Only players are able to use this command!");
-						return true;
-					}
-					if (args[2].equalsIgnoreCase("add")) {
-						//get session
-						CTFSession session = null;
-						CTFTeam team = null;
-						for (CTFSession s : sessions) {
-							if (s.getName().equalsIgnoreCase(args[3])) {
-								session = s;
-								break;
-							}
-						}
-						
-						if (session == null) {
-							sender.sendMessage("Unable to find session named " + args[3] + "!");
-							return true;
-						}
-						
-						//get the team
-						team = session.getTeam(args[4]);
-						
-						if (team == null) {
-							//never found that team
-							sender.sendMessage("Could not find a team by the name " + args[4]);
-							return true;
-						}
-						
-						Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-						if (selection == null || selection.getArea() == 0) {
-							//player has nothing selected
-							sender.sendMessage("You must select 1 more more blocks to set as a spawn point!");
-							return true;
-						}
-						//haz selection
-
-						
-						Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
-						World world = max.getWorld();
-						for (int i = min.getBlockX(); i <= max.getBlockX(); i++) {
-						for (int j = min.getBlockY(); j <= max.getBlockY(); j++) {
-						for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
-							team.getSpawnLocations().add(new Location(world, i,j,k));
-						}}}
-						sender.sendMessage("Set all blocks as a spawn point");
-						return true;
-					}
+				
+				Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+				World world = max.getWorld();
+				for (int i = min.getBlockX(); i <= max.getBlockX(); i++)
+				for (int j = min.getBlockY(); j <= max.getBlockY(); j++)
+				for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
+					team.getFlagLocations().add(new Location(world, i,j,k));
 				}
-				else if (args[1].equalsIgnoreCase("flag")) {
-					//it'll be /ctf team flag add [session] [team]
-					if (args.length != 5) {
-						sender.sendMessage("/cf team flag [\"add\"] [session name] [team name]");
-						return true; 
-					}
-					//this also uses selection, which is only made by a player
-					if (!(sender instanceof Player)) {
-						sender.sendMessage("Only players are able to use this command!");
-						return true;
-					}
-					
-					if (args[2].equalsIgnoreCase("add")) {
-					
-						CTFSession session = null;
-						CTFTeam team;
-						
-						for (CTFSession s : sessions) {
-							if (s.getName().equalsIgnoreCase(args[3])) {
-								session = s;
-								break;
-							}
-						}
-						
-						if (session == null) {
-							sender.sendMessage("Unable to find session with the name " + args[3]);
-							return true;
-						}
-						
-						//now get the team
-						team = session.getTeam(args[4]);
-						
-						if (team == null) {
-							sender.sendMessage("Unable to find team with the name " + args[4]);
-							return true;
-						}
-						
-						//team and session are both good. 
-						Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-						if (selection == null || selection.getArea() == 0) {
-							sender.sendMessage("You must select an area to set as a flag spawning location!");
-							return true;
-						}
-						
-						Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
-						World world = max.getWorld();
-						for (int i = min.getBlockX(); i <= max.getBlockX(); i++)
-						for (int j = min.getBlockY(); j <= max.getBlockY(); j++)
-						for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
-							team.getFlagLocations().add(new Location(world, i,j,k));
-						}
-						sender.sendMessage("Added all blocks selected as flag locations.");
-						return true;						
-					}
-					
-				}
-				else if (args[1].equalsIgnoreCase("goal")) {
-					//it'll be /ctf team flag add [session] [team]
-					if (args.length != 4) {
-						sender.sendMessage("/cf team goal [session name] [team name]");
-						return true; 
-					}
-					//this also uses selection, which is only made by a player
-					if (!(sender instanceof Player)) {
-						sender.sendMessage("Only players are able to use this command!");
-						return true;
-					}
-					
-					CTFSession session = null;
-					CTFTeam team;
-						
-					for (CTFSession s : sessions) {
-						if (s.getName().equalsIgnoreCase(args[2])) {
-							session = s;
-							break;
-						}
-					}
-						
-					if (session == null) {
-						sender.sendMessage("Unable to find session with the name " + args[2]);
-						return true;
-					}
-						
-					//now get the team
-					team = session.getTeam(args[3]);
-						
-					if (team == null) {
-						sender.sendMessage("Unable to find team with the name " + args[3]);
-						return true;
-					}
-						
-					//team and session are both good. 
-					Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
-					if (selection == null || selection.getArea() == 0) {
-						sender.sendMessage("You must select an area to set as a goal!");
-						return true;
-					}
-					
-					
-					//NoEditGoal goal = new NoEditGoal(selection);
-					//Region region = CTFPlugin.wgplugin.getRegionManager();
-					Location min, max;
-					min = selection.getMinimumPoint();
-					max = selection.getMaximumPoint();
-					com.sk89q.worldedit.Vector minV, maxV;
-					minV = new com.sk89q.worldedit.Vector(min.getX(), min.getY(), min.getZ());
-					maxV = new com.sk89q.worldedit.Vector(max.getX(), max.getY(), max.getZ());
-					Region region = new CuboidRegion(minV, maxV);
-					
-					NoEditGoal goal = new NoEditGoal(region, team);
-					
-					team.setgoal(goal);
-					
-					sender.sendMessage("set the goal for team " + team.getName());
-					return true;						
-				}
-					
-					
+				sender.sendMessage("Added all blocks selected as flag locations.");
+				return true;						
 			}
+			
 		}
-		
+		else if (args[1].equalsIgnoreCase("goal")) {
+			//it'll be /ctf team flag add [session] [team]
+			if (args.length != 4) {
+				sender.sendMessage("/cf team goal [session name] [team name]");
+				return true; 
+			}
+			//this also uses selection, which is only made by a player
+			if (!(sender instanceof Player)) {
+				sender.sendMessage("Only players are able to use this command!");
+				return true;
+			}
+			
+			CTFSession session = null;
+			CTFTeam team;
+				
+			for (CTFSession s : sessions) {
+				if (s.getName().equalsIgnoreCase(args[2])) {
+					session = s;
+					break;
+				}
+			}
+				
+			if (session == null) {
+				sender.sendMessage("Unable to find session with the name " + args[2]);
+				return true;
+			}
+				
+			//now get the team
+			team = session.getTeam(args[3]);
+				
+			if (team == null) {
+				sender.sendMessage("Unable to find team with the name " + args[3]);
+				return true;
+			}
+				
+			//team and session are both good. 
+			Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+			if (selection == null || selection.getArea() == 0) {
+				sender.sendMessage("You must select an area to set as a goal!");
+				return true;
+			}
+			
+			
+			//NoEditGoal goal = new NoEditGoal(selection);
+			//Region region = CTFPlugin.wgplugin.getRegionManager();
+			Location min, max;
+			min = selection.getMinimumPoint();
+			max = selection.getMaximumPoint();
+			com.sk89q.worldedit.Vector minV, maxV;
+			minV = new com.sk89q.worldedit.Vector(min.getX(), min.getY(), min.getZ());
+			maxV = new com.sk89q.worldedit.Vector(max.getX(), max.getY(), max.getZ());
+			Region region = new CuboidRegion(minV, maxV);
+			
+			NoEditGoal goal = new NoEditGoal(region, team);
+			
+			team.setgoal(goal);
+			
+			sender.sendMessage("set the goal for team " + team.getName());
+			return true;						
+		}
 		
 		return false;
 	}
