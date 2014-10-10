@@ -45,6 +45,8 @@ public interface CTFTeam {
 	public String getName();
 	
 	public DyeColor getColor();
+	
+	public void setColor(DyeColor color);
 
 	//ADD public setRespawn();
 	

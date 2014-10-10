@@ -10,9 +10,9 @@ public interface CTFSession {
 	
 	public List<CTFTeam> getTeams();
 	
-	public void createTeam(String name);
+	public CTFTeam createTeam(String name);
 	
-	public void createTeam(String name, List<Player> players);
+	public CTFTeam createTeam(String name, List<Player> players);
 	
 	public void removeTeam(CTFTeam team);
 	

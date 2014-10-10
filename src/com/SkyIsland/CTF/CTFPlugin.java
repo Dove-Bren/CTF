@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -142,7 +143,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 				}
 				//never returned so never found that team
-				sender.sendMessage("Could not find a team with that name! Try using /lteams to see all available teams");
+				sender.sendMessage("Could not find a team with the name " + args[0] + "! Try using /lteams to see all available teams");
 				return true;
 			}
 			else if (args.length == 2) {
@@ -151,7 +152,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				CTFTeam team = null;
 				//first try and get the session.
 				for (CTFSession s : sessions) {
-					if (s.getName() == args[0]) {
+					if (s.getName().equalsIgnoreCase(args[0])) {
 						//found the sesson
 						session = s;
 						break;
@@ -184,7 +185,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			}
 		}
 		
-		if (command.equalsIgnoreCase("capturetheflag")) {
+		if (command.equalsIgnoreCase("capturetheflag") || command.equalsIgnoreCase("ctf")) {
 			//admin command. commands are: session, team
 			if (args.length == 0) {
 				return false; //no just ctf command
@@ -240,9 +241,9 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					return true;
 					
 				}
-				else if (args[0].equalsIgnoreCase("start")) {
-					if (args.length != 2) {
-						return false; //has to be ctf start <session>
+				else if (args[1].equalsIgnoreCase("start")) {
+					if (args.length != 3) {
+						return false; //has to be /ctf session start <session>
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
@@ -253,12 +254,104 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					}
 					if (session == null) {
 						//diddn't find a session with that name
-						sender.sendMessage("Session with the name " + session.getName() + " wasn't found!");
+						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
 						return true;
 					}
 					session.start();
 					return true;
 				}
+				else if (args[1].equalsIgnoreCase("stop")) {
+					if (args.length != 3) {
+						return false; //has to be /ctf session stop <session>
+					}
+					CTFSession session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[1])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						//diddn't find a session with that name
+						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
+						return true;
+					}
+					session.stop();
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("remove")) {
+					if (args.length != 3) {
+						return false; //has to be ctf session remove <session>
+					}
+					CTFSession session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[1])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						//diddn't find a session with that name
+						sender.sendMessage("Session with the name " + args[1] + " wasn't found!");
+						return true;
+					}
+
+					if (session.isRunning()) {
+						session.stop();
+					}
+					sessions.remove(session);
+					
+					return true;
+				}
+				
+			}
+			else if (args[0].equalsIgnoreCase("team")) {
+				//we can create teams or remove teams
+				if (args.length == 1) {
+					return false; //no /ctf team   command
+				}
+				if (args[1].equalsIgnoreCase("create")) {
+					//it'll be /ctf team create [session] [name] [color]
+					if (args.length != 5) {
+						//we don't have the right number of arguments
+						return false;
+					}
+					
+					//find the team specified
+					CTFSession session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						sender.sendMessage("Failed to find a session by the name " + args[2]);
+						return true;
+					}
+					
+					//make sure a team with that name doesn't exist
+					if (session.hasTeam(args[3])) {
+						sender.sendMessage("A team with that name in this session already exists!");
+						return true;
+					}
+					
+					//try and get that color					
+					DyeColor color = null;
+					try {
+						color = DyeColor.valueOf(args[4].toUpperCase());
+					}
+					catch (IllegalArgumentException e) {
+						sender.sendMessage("Could not convert " + args[4].toUpperCase() + " to a dye color!");
+						return true;
+					}
+					
+					CTFTeam team = session.createTeam(args[3]);
+					team.setColor(color);
+					sender.sendMessage("Team named [" + team.getName() + "] created on session [" + session.getName() + "]!");
+					return true;
+				}
+					
 			}
 		}
 		

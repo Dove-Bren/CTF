@@ -52,8 +52,10 @@ public class NoEditSession implements CTFSession, Listener {
 	 * @param name The Name to be attributed to the team
 	 */
 	@Override
-	public void createTeam(String name) {
-		this.Teams.add(new NoEditTeam(name));
+	public CTFTeam createTeam(String name) {
+		CTFTeam team = new NoEditTeam(name);
+		Teams.add(team);
+		return team;
 	}
 
 	/**
@@ -62,11 +64,12 @@ public class NoEditSession implements CTFSession, Listener {
 	 * @param players The list of players to be associated with the team
 	 */
 	@Override
-	public void createTeam(String name, List<Player> players) {
+	public CTFTeam createTeam(String name, List<Player> players) {
 		NoEditTeam team;
 		team = new NoEditTeam(name);
 		this.Teams.add(team);
 		team.setPlayers(players);
+		return team;
 	}
 
 	@Override
@@ -140,7 +143,7 @@ public class NoEditSession implements CTFSession, Listener {
 	@Override
 	public boolean hasTeam(String name) {
 		for (CTFTeam t : Teams) {
-			if (t.getName() == name) {
+			if (t.getName().equalsIgnoreCase(name)) {
 				return true;
 			}
 		}
@@ -150,7 +153,7 @@ public class NoEditSession implements CTFSession, Listener {
 	@Override
 	public CTFTeam getTeam(String name) {
 		for (CTFTeam t : Teams) {
-			if (t.getName() == name) {
+			if (t.getName().equalsIgnoreCase(name)) {
 				return t;
 			}
 		}

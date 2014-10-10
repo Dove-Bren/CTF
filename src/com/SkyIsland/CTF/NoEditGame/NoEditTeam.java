@@ -149,4 +149,9 @@ public class NoEditTeam implements CTFTeam {
 		return this.teamColor;
 	}
 	
+	@Override
+	public void setColor(DyeColor color) {
+		this.teamColor = color;
+	}
+	
 }
