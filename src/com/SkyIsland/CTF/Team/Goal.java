@@ -1,6 +1,7 @@
 package com.SkyIsland.CTF.Team;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.Region;
@@ -13,6 +14,7 @@ import com.sk89q.worldedit.regions.Region;
 public abstract class Goal {
 	
 	private Region GoalDimensions;
+	private CTFTeam GoalTeam;
 	
 	/**
 	 * This is the constructor for the Goal Class
@@ -37,6 +39,13 @@ public abstract class Goal {
 	public void setGoalDimensions(Region goalDimensions) {
 		GoalDimensions = goalDimensions;
 	}
+	
+	/**
+	 * This determines if the player within the goal has actually scored, specific to the game mode
+	 * @param p The player 
+	 * @return True if a player scores
+	 */
+	public abstract boolean isValidScore(Player p);
 	
 	/**
 	 * This method determines if the given player location is within this Goal's dimensions
