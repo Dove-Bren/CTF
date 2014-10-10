@@ -3,8 +3,10 @@ package com.SkyIsland.CTF.NoEditGame;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
 
 
 
@@ -20,6 +22,7 @@ public class NoEditTeam implements CTFTeam {
 	private int score;
 	private Goal TeamGoal;
 	private Location SpawnLocation;
+	private DyeColor teamColor;
 	
 	//Constructors
 	
@@ -139,6 +142,11 @@ public class NoEditTeam implements CTFTeam {
 	@Override
 	public String getName() {
 		return this.TeamName;
+	}
+
+	@Override
+	public DyeColor getColor() {
+		return this.teamColor;
 	}
 	
 }
