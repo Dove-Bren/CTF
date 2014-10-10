@@ -1,6 +1,7 @@
 name: CTF
 main: com.SkyIsland.CTF.CTFPlugin
 version: 90.35
+softdepend: [WorldEdit]
 permissions:
     ctfadmin:
         default: op
