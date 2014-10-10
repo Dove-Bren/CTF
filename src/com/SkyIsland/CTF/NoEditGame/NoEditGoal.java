@@ -51,7 +51,8 @@ public final class NoEditGoal extends Goal {
 				if (!m.equals(w.toItemStack()))
 					return true;
 				else {
-					//INVOKE RETURN FLAG METHOD
+					this.GoalTeam.resetFlag();
+					p.getPlayer().getInventory().remove(m);
 				}
 			}
 		}
