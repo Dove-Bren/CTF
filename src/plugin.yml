@@ -5,6 +5,7 @@ permissions:
     ctfadmin:
         default: op
     ctfplayer:
+        default: true
 commands:
     ctf:
         permission: ctfadmin
@@ -21,4 +22,4 @@ commands:
     lteams:
         permission: ctfplayer
         usage: /lteams <session>
-        description: lists the teams in the specified session. If no session is passed, it returns the teams in the first session
+        description: lists the teams in the specified session. If no session is passed, it returns all teams in all sessions
