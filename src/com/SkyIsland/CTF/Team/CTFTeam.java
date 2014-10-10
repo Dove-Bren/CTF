@@ -1,9 +1,11 @@
 package com.SkyIsland.CTF.Team;
 
 import java.util.List;
-import com.sk89q.worldedit.regions.Region;
-import org.bukkit.Location;
 
+import com.sk89q.worldedit.regions.Region;
+
+import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 /**
@@ -39,6 +41,10 @@ public interface CTFTeam {
 	public boolean inTeam(Player player);
 	
 	public TeamPlayer getTeamPlayer(Player player);
+	
+	public String getName();
+	
+	public DyeColor getColor();
 
 	//ADD public setRespawn();
 	

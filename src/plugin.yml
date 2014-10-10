@@ -1,3 +1,25 @@
 name: CTF
 main: com.SkyIsland.CTF.CTFPlugin
 version: 90.34
+permissions:
+    ctfadmin:
+        default: op
+    ctfplayer:
+        default: true
+commands:
+    ctf:
+        permission: ctfadmin
+        usage: /ctf <command> [args]
+        description: base command for admin-level ctf commands
+    join:
+        permission: ctfplayer
+        usage: /join [session] <team>
+        description: joins the specified team
+    leave:
+        permission: ctfplayer
+        usage: /leave
+        description: leaves the current team
+    lteams:
+        permission: ctfplayer
+        usage: /lteams <session>
+        description: lists the teams in the specified session. If no session is passed, it returns all teams in all sessions
