@@ -1,6 +1,5 @@
 package com.SkyIsland.CTF.NoEditGame;
 
-import java.lang.reflect.Array;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -28,6 +27,7 @@ public class NoEditTeam implements CTFTeam {
 
 	private String TeamName;
 	private List<Player> Players;
+	private List<TeamPlayer> teamPlayers;
 	private List<Location> spawnLocations;
 	private List<Location> flagLocations;
 	private int score;
@@ -43,6 +43,7 @@ public class NoEditTeam implements CTFTeam {
 	public NoEditTeam(String TeamName) {
 		setTeamName(TeamName);
 		Players = new LinkedList<Player>();
+		teamPlayers = new LinkedList<TeamPlayer>();
 		this.score = 0;
 		setgoal(null);
 		setSpawnLocations(null);
@@ -58,6 +59,7 @@ public class NoEditTeam implements CTFTeam {
 	public NoEditTeam(String TeamName, List<Player> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
 		setTeamName(TeamName);
 		setPlayers(Players);
+		teamPlayers = new LinkedList<TeamPlayer>();
 		this.score = 0;
 		setgoal(TeamGoal);
 		setSpawnLocations(spawnLocations);
@@ -249,4 +251,8 @@ public class NoEditTeam implements CTFTeam {
 		this.teamColor = color;
 	}
 	
+	@Override
+	public List<TeamPlayer> getTeamPlayers() {
+		return this.teamPlayers;
+	}
 }

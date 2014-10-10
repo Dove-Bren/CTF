@@ -1,7 +1,6 @@
 package com.SkyIsland.CTF.Team;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.Region;

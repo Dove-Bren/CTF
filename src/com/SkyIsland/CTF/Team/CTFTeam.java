@@ -2,7 +2,6 @@ package com.SkyIsland.CTF.Team;
 
 import java.util.List;
 
-import com.sk89q.worldedit.regions.Region;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -63,6 +62,8 @@ public interface CTFTeam {
 	public DyeColor getColor();
 	
 	public void setColor(DyeColor color);
+	
+	public List<TeamPlayer> getTeamPlayers();
 
 	
 	

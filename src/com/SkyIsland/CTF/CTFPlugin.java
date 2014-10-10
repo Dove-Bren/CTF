@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,11 +18,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import com.SkyIsland.CTF.NoEditGame.NoEditSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.bukkit.selections.Selection;
 
 public class CTFPlugin extends JavaPlugin implements Listener {
 	
@@ -41,6 +45,15 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, this);
 		
 		CTFTypes.registerType(NoEditSession.class);
+		
+		//make sure to get all players currently in on reload in our map
+		for (World w : Bukkit.getWorlds()) {
+			if (!w.getPlayers().isEmpty()) {
+				for (Player p : w.getPlayers()) {
+					CTFPlugin.hashPlayer(p);
+				}
+			}
+		}
 		
 	}
 	
@@ -162,14 +175,14 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				//make sure we found the sesson
 				if (session == null) {
 					sender.sendMessage("Could not find the session " + args[0] + "!");
-					return false;
+					return true;
 				}
 				
 				//we found the session, so try and find the team
 				team = session.getTeam(args[1]);
 				if (team == null) {
 					sender.sendMessage("Could not find the team " + args[1] + "!");
-					return false;
+					return true;
 				}
 				
 				//found both the session and team
@@ -185,7 +198,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			}
 		}
 		
-		if (command.equalsIgnoreCase("capturetheflag") || command.equalsIgnoreCase("ctf")) {
+		if (command.equalsIgnoreCase("capturetheflag") || command.equalsIgnoreCase("cf") || command.equalsIgnoreCase("ctf")) {
 			//admin command. commands are: session, team
 			if (args.length == 0) {
 				return false; //no just ctf command
@@ -194,18 +207,20 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			if (args[0].equalsIgnoreCase("session")) {
 				//what to do with session. We cant create one, delete one, start one, or end one
 				if (args.length == 1) {
-					return false; //no /ctf session command
+					sender.sendMessage("/cf session [create/remove/start/stop]");
+					return true; //no /ctf session command
 				}
 				if (args[1].equalsIgnoreCase("create")) {
 					//going to create one. Need to pass a type
 					if (args.length < 4) {
-						return false; //need at least 4: session, create, type, name
+						sender.sendMessage("/cf session create [type] [name]");
+						return true; //need at least 4: session, create, type, name
 					}
 					Class<? extends CTFSession> sesClass = CTFTypes.getSession(args[2]);
 					if (sesClass == null) {
 						//couldn't find that kind of session
 						sender.sendMessage("Invalid session type!");
-						return false;
+						return true;
 					}
 					
 					CTFSession session = null;
@@ -233,7 +248,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					
 					if (session == null) {
 						sender.sendMessage("Unable to instantiate the session...");
-						return false;
+						return true;
 					}
 					
 					sessions.add(session);
@@ -243,7 +258,8 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				}
 				else if (args[1].equalsIgnoreCase("start")) {
 					if (args.length != 3) {
-						return false; //has to be /ctf session start <session>
+						sender.sendMessage("/cf session start [session name]");
+						return true; //has to be /ctf session start <session>
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
@@ -262,7 +278,8 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				}
 				else if (args[1].equalsIgnoreCase("stop")) {
 					if (args.length != 3) {
-						return false; //has to be /ctf session stop <session>
+						sender.sendMessage("/cf session stop [session name]");
+						return true; //has to be /ctf session stop <session>
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
@@ -281,7 +298,8 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				}
 				else if (args[1].equalsIgnoreCase("remove")) {
 					if (args.length != 3) {
-						return false; //has to be ctf session remove <session>
+						sender.sendMessage("/cf session remove [session name]");
+						return true; //has to be ctf session remove <session>
 					}
 					CTFSession session = null;
 					for (CTFSession s : sessions) {
@@ -300,7 +318,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 						session.stop();
 					}
 					sessions.remove(session);
-					
+					sender.sendMessage("Session " + session.getName() + "removed!");
 					return true;
 				}
 				
@@ -308,13 +326,15 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			else if (args[0].equalsIgnoreCase("team")) {
 				//we can create teams or remove teams
 				if (args.length == 1) {
-					return false; //no /ctf team   command
+					sender.sendMessage("/cf team [create/remove/spawn/flag]");
+					return true; //no /ctf team   command
 				}
 				if (args[1].equalsIgnoreCase("create")) {
 					//it'll be /ctf team create [session] [name] [color]
 					if (args.length != 5) {
 						//we don't have the right number of arguments
-						return false;
+						sender.sendMessage("/cf team create [session name] [team name] [team color]");
+						return true; 
 					}
 					
 					//find the team specified
@@ -350,6 +370,153 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					team.setColor(color);
 					sender.sendMessage("Team named [" + team.getName() + "] created on session [" + session.getName() + "]!");
 					return true;
+				}
+				else if (args[1].equalsIgnoreCase("remove")) {
+					//it'll be /ctf team remove session team
+					if (args.length != 4) {
+						sender.sendMessage("/cf team remove [session name] [team name]");
+						return true; 
+					}
+					CTFSession session;
+					CTFTeam team;
+					session = null;
+					for (CTFSession s : sessions) {
+						if (s.getName().equalsIgnoreCase(args[2])) {
+							session = s;
+							break;
+						}
+					}
+					if (session == null) {
+						sender.sendMessage("Could not find a session by the name " + args[2]);
+						return true;
+					}
+					
+					team = session.getTeam(args[3]);
+					if (team == null) {
+						sender.sendMessage("Could not find a team by the name " + args[3]);
+					}
+					
+					//got hte session and team
+					//reset all players in that team
+					for (TeamPlayer tp : team.getTeamPlayers()) {
+						tp.setTeam(null);
+					}
+					session.removeTeam(team);
+					sender.sendMessage("Removed the team [" + team.getName() + "] from session [" + session.getName() + "]!");
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("spawn")) {
+					//set a player spawn point for this time
+					//can be /ctf team spawn add [session] [team],   ---
+					if (args.length != 5) {
+						sender.sendMessage("/cf team spawn [\"add\"] [session name] [team name]");
+						return true; 
+					}
+					//these also usea selection, which is only made by a player
+					if (!(sender instanceof Player)) {
+						sender.sendMessage("Only players are able to use this command!");
+						return true;
+					}
+					if (args[2].equalsIgnoreCase("add")) {
+						//get session
+						CTFSession session = null;
+						CTFTeam team = null;
+						for (CTFSession s : sessions) {
+							if (s.getName().equalsIgnoreCase(args[3])) {
+								session = s;
+								break;
+							}
+						}
+						
+						if (session == null) {
+							sender.sendMessage("Unable to find session named " + args[3] + "!");
+							return true;
+						}
+						
+						//get the team
+						team = session.getTeam(args[4]);
+						
+						if (team == null) {
+							//never found that team
+							sender.sendMessage("Could not find a team by the name " + args[4]);
+							return true;
+						}
+						
+						Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+						if (selection == null || selection.getArea() == 0) {
+							//player has nothing selected
+							sender.sendMessage("You must select 1 more more blocks to set as a spawn point!");
+							return true;
+						}
+						//haz selection
+						Location min, max;
+						min = selection.getMinimumPoint();
+						max = selection.getMaximumPoint();
+						Vector v = max.toVector().subtract(min.toVector());
+						for (int i = 0; i < v.getBlockX(); i++)
+						for (int j = 0; j < v.getBlockY(); j++)
+						for (int k = 0; k < v.getBlockZ(); k++) {
+							team.getSpawnLocations().add(min.add(i,j,k));
+						}
+						sender.sendMessage("Set all blocks as a spawn point");
+						return true;
+					}
+				}
+				else if (args[1].equalsIgnoreCase("flag")) {
+					//it'll be /ctf team flag add [session] [team]
+					if (args.length != 5) {
+						sender.sendMessage("/cf team flag [\"add\"] [session name] [team name]");
+						return true; 
+					}
+					//this also uses selection, which is only made by a player
+					if (!(sender instanceof Player)) {
+						sender.sendMessage("Only players are able to use this command!");
+						return true;
+					}
+					
+					if (args[2].equalsIgnoreCase("add")) {
+					
+						CTFSession session = null;
+						CTFTeam team;
+						
+						for (CTFSession s : sessions) {
+							if (s.getName().equalsIgnoreCase(args[3])) {
+								session = s;
+								break;
+							}
+						}
+						
+						if (session == null) {
+							sender.sendMessage("Unable to find session with the name " + args[3]);
+							return true;
+						}
+						
+						//now get the team
+						team = session.getTeam(args[4]);
+						
+						if (team == null) {
+							sender.sendMessage("Unable to find team with the name " + args[4]);
+							return true;
+						}
+						
+						//team and session are both good. 
+						Selection selection = CTFPlugin.weplugin.getSelection((Player) sender);
+						if (selection == null || selection.getArea() == 0) {
+							sender.sendMessage("You must select an area to set as a flag spawning location!");
+							return true;
+						}
+						
+						Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+						Vector v = max.toVector().subtract(min.toVector());
+						for (int i = 0; i < v.getBlockX(); i++)
+						for (int j = 0; j < v.getBlockY(); j++)
+						for (int k = 0; k < v.getBlockZ(); k++) {
+							team.getSpawnLocations().add(min.add(i,j,k));
+						}
+						sender.sendMessage("Added all blocks selected as flag locations.");
+						return true;						
+					}
+					
 				}
 					
 			}
