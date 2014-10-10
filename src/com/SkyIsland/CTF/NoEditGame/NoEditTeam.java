@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Wool;
+import org.bukkit.scoreboard.Score;
 
 import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.Team.CTFTeam;
@@ -32,6 +33,7 @@ public class NoEditTeam implements CTFTeam {
 	private int score;
 	private Goal TeamGoal;
 	private DyeColor teamColor;
+	private Score teamScore;
 	
 	//Constructors
 	
@@ -39,8 +41,9 @@ public class NoEditTeam implements CTFTeam {
 	 * This constructor allows for specification of the Team name
 	 * @param TeamName
 	 */
-	public NoEditTeam(String TeamName) {
+	public NoEditTeam(String TeamName, Score score) {
 		setTeamName(TeamName);
+		teamScore = score;
 		teamPlayers = new LinkedList<TeamPlayer>();
 		this.score = 0;
 		setgoal(null);
@@ -54,8 +57,9 @@ public class NoEditTeam implements CTFTeam {
 	 * @param TeamGoal The Goal Region of the team
 	 * @param SpawnLocation The spawn location of the team players
 	 */
-	public NoEditTeam(String TeamName, List<TeamPlayer> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
+	public NoEditTeam(String TeamName, Score teamScore, List<TeamPlayer> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
 		setTeamName(TeamName);
+		this.teamScore = teamScore;
 		setTeamPlayers(Players);
 		this.score = 0;
 		setgoal(TeamGoal);
@@ -105,11 +109,19 @@ public class NoEditTeam implements CTFTeam {
 	@Override
 	public void addToScore(int increment) {
 		this.score += increment;
+		this.teamScore.setScore(score);
 	}
 
 	@Override
 	public void subToScore(int decrement) {
 		this.score -= decrement;
+		this.teamScore.setScore(score);
+	}
+	
+	@Override
+	public void resetScore() {
+		this.score = 0;
+		this.teamScore.setScore(score);
 	}
 	
 	

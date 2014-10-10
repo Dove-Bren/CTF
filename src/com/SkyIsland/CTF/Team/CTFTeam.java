@@ -41,6 +41,7 @@ public interface CTFTeam {
 	public int getScore();
 	public void addToScore(int increment);
 	public void subToScore(int decrement);
+	public void resetScore();
 	
 	public void resetFlag();
 	

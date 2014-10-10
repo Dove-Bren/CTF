@@ -143,6 +143,11 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			
 			team.removePlayer(tp);
 			sender.sendMessage("You have left your team.");
+			if (team.getGoal() != null && team.getGoal().isAccepting()) {
+				//session still going on. Teleport them out
+				tp.moveLeave(); //to 0,0,0 for now :( 
+				//TODO SUPER IMPORTANT
+			}
 			return true;
 		}
 		
@@ -152,7 +157,8 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 				for (CTFSession s: sessions) {
 					if (s.hasTeam(args[0])) {
 						CTFTeam team = s.getTeam(args[0]);
-						team.addPlayer( getTeamPlayer((Player) sender));
+						s.addPlayer(team, getTeamPlayer((Player) sender));
+						
 						sender.sendMessage("You have joined the team [" + team.getName() + "] in the session [" + s.getName() + "]!");
 						return true;
 					}
@@ -323,6 +329,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					for (CTFTeam t : session.getTeams()) {
 						for (TeamPlayer tp : t.getTeamPlayers()) {
 							tp.setTeam(null);
+							tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 						}
 					}
 					sessions.remove(session);
@@ -408,6 +415,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 					//reset all players in that team
 					for (TeamPlayer tp : team.getTeamPlayers()) {
 						tp.setTeam(null);
+						tp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 					}
 					session.removeTeam(team);
 					sender.sendMessage("Removed the team [" + team.getName() + "] from session [" + session.getName() + "]!");

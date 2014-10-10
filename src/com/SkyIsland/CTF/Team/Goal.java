@@ -14,6 +14,7 @@ public abstract class Goal {
 	
 	protected Region GoalDimensions;
 	protected CTFTeam GoalTeam;
+	protected boolean acceptingGoals;
 	
 	/**
 	 * This is the constructor for the Goal Class
@@ -22,6 +23,15 @@ public abstract class Goal {
 	public Goal (Region GoalDimensions, CTFTeam myTeam) {
 		this.GoalDimensions = GoalDimensions;
 		this.GoalTeam = myTeam;
+		acceptingGoals = false;
+	}
+	
+	public void setAccepting(boolean accepting) {
+		this.acceptingGoals = accepting;
+	}
+	
+	public boolean isAccepting() {
+		return this.acceptingGoals;
 	}
 	
 	/**
