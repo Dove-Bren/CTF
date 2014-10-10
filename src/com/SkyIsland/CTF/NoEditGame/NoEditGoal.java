@@ -43,8 +43,11 @@ public final class NoEditGoal extends Goal {
 		Wool w = new Wool(this.GoalTeam.getColor());
 		//Check for wool
 		for (ItemStack m : p.getPlayer().getInventory()) {
+			
+			
+			
 			//If item in inventory is wool
-			if (m.equals(Material.WOOL))
+			if (m != null && m.equals(Material.WOOL))
 			{
 				//Check to see if it is my own team color
 				if (!m.equals(w.toItemStack())) {
