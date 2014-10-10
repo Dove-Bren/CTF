@@ -47,7 +47,8 @@ public class NoEditTeam implements CTFTeam {
 		teamPlayers = new LinkedList<TeamPlayer>();
 		this.score = 0;
 		setgoal(null);
-		setSpawnLocations(null);
+		setSpawnLocations(new LinkedList<Location>());
+		setFlagLocations(new LinkedList<Location>());
 	}
 	
 	/**
@@ -185,7 +186,7 @@ public class NoEditTeam implements CTFTeam {
 	private Location randomLocation(List<Location> locations) {
 		int size = locations.size();
 		Random r = new Random();
-		return locations.get(size % r.nextInt());
+		return locations.get(r.nextInt(size));
 	}
 	
 	private ItemStack[] generateArmor() {

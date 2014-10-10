@@ -18,7 +18,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.Vector;
 
 import com.SkyIsland.CTF.NoEditGame.NoEditGoal;
 import com.SkyIsland.CTF.NoEditGame.NoEditSession;
@@ -466,15 +465,15 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 							return true;
 						}
 						//haz selection
-						Location min, max;
-						min = selection.getMinimumPoint();
-						max = selection.getMaximumPoint();
-						Vector v = max.toVector().subtract(min.toVector());
-						for (int i = 0; i < v.getBlockX(); i++)
-						for (int j = 0; j < v.getBlockY(); j++)
-						for (int k = 0; k < v.getBlockZ(); k++) {
-							team.getSpawnLocations().add(min.add(i,j,k));
-						}
+
+						
+						Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
+						World world = max.getWorld();
+						for (int i = min.getBlockX(); i <= max.getBlockX(); i++) {
+						for (int j = min.getBlockY(); j <= max.getBlockY(); j++) {
+						for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
+							team.getSpawnLocations().add(new Location(world, i,j,k));
+						}}}
 						sender.sendMessage("Set all blocks as a spawn point");
 						return true;
 					}
@@ -524,11 +523,11 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 						}
 						
 						Location max = selection.getMaximumPoint(), min = selection.getMinimumPoint();
-						Vector v = max.toVector().subtract(min.toVector());
-						for (int i = 0; i < v.getBlockX(); i++)
-						for (int j = 0; j < v.getBlockY(); j++)
-						for (int k = 0; k < v.getBlockZ(); k++) {
-							team.getSpawnLocations().add(min.add(i,j,k));
+						World world = max.getWorld();
+						for (int i = min.getBlockX(); i <= max.getBlockX(); i++)
+						for (int j = min.getBlockY(); j <= max.getBlockY(); j++)
+						for (int k = min.getBlockZ(); k <= max.getBlockZ(); k++) {
+							team.getFlagLocations().add(new Location(world, i,j,k));
 						}
 						sender.sendMessage("Added all blocks selected as flag locations.");
 						return true;						
