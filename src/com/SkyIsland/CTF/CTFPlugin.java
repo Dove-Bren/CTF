@@ -402,6 +402,7 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 			DyeColor color = null;
 			try {
 				color = DyeColor.valueOf(args[4].toUpperCase());
+				System.out.println(color);
 			}
 			catch (IllegalArgumentException e) {
 				sender.sendMessage("Could not convert " + args[4].toUpperCase() + " to a dye color!");

@@ -14,10 +14,12 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import com.SkyIsland.CTF.CTFPlugin;
 import com.SkyIsland.CTF.CTFSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
+import com.SkyIsland.CTF.Team.Goal;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 
 public class NoEditSession implements CTFSession, Listener {
@@ -74,7 +76,7 @@ public class NoEditSession implements CTFSession, Listener {
 	@Override
 	public CTFTeam createTeam(String name) {
 		Score score = scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(name);
-		CTFTeam team = new NoEditTeam(name, score);
+		CTFTeam team = new NoEditTeam(this, name, score);
 		Teams.add(team);
 		score.setScore(1);
 		score.setScore(0);
@@ -91,7 +93,7 @@ public class NoEditSession implements CTFSession, Listener {
 		NoEditTeam team;
 		Score score;
 		score = scoreboard.getObjective(DisplaySlot.SIDEBAR).getScore(name);
-		team = new NoEditTeam(name, score);
+		team = new NoEditTeam(this, name, score);
 		this.Teams.add(team);
 		score.setScore(1);
 		score.setScore(0);
@@ -172,11 +174,33 @@ public class NoEditSession implements CTFSession, Listener {
 	
 	@EventHandler
 	public void punchWool(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_BLOCK)
-		if (event.getClickedBlock().getType() == Material.WOOL) {
-			event.getClickedBlock().breakNaturally();
-			event.setCancelled(true);
+		
+		
+		CTFTeam team = null;
+		TeamPlayer player = null;
+		
+		for (CTFTeam t: Teams){
+			for (TeamPlayer p: t.getTeamPlayers()){
+				if (p.getPlayer().equals(event.getPlayer())){
+					player = p;
+					team = t;
+				}
+			}
 		}
+		
+		if (player == null){
+			return;
+		}
+		
+		if (event.getAction() == Action.LEFT_CLICK_BLOCK){
+			if (event.getClickedBlock().getType() == Material.WOOL) {
+				if (event.getClickedBlock().getData() != team.getColor().getWoolData()){
+					event.getClickedBlock().breakNaturally();
+				}
+			}
+		}
+		
+		event.setCancelled(true);
 	}
 	
 	@EventHandler
@@ -189,12 +213,21 @@ public class NoEditSession implements CTFSession, Listener {
 			}
 		}
 		
-		//if (team.getGoal() != null && (team != null && team.getGoal().isInGoal(event.getTo()))) {
-		if (team != null && team.getGoal() != null && team.getGoal().isInGoal(event.getTo()) && team.getGoal().isValidScore(CTFPlugin.getTeamPlayer(event.getPlayer()))) {
-			team.addToScore(1);
+		if (team == null){
+			return;
 		}
 		
+		Goal goal = team.getGoal();
+		if (goal == null){
+			return;
+		}
 		
+		if (team.getGoal().isInGoal(event.getTo())){
+			if (team.getGoal().isValidScore(CTFPlugin.getTeamPlayer(event.getPlayer()))) {
+				team.addToScore(1);
+				System.out.println("GOOOAAALLL!");
+			}
+		}
 	}
 
 	@Override

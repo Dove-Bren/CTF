@@ -26,8 +26,13 @@ public final class NoEditGoal extends Goal {
 	 */
 	@Override
 	public boolean isValidScore(TeamPlayer p) {
-		if (this.GoalTeam.equals(p.getTeam()))
+		
+		if (this.GoalTeam.equals(p.getTeam())){
+			System.out.println("Is your own team");
+			
 			return containsEnemyWool(p, p.getTeam());
+		}
+		
 		return false;
 	}
 	
@@ -42,22 +47,24 @@ public final class NoEditGoal extends Goal {
 	private boolean containsEnemyWool(TeamPlayer p, CTFTeam team) {
 		Wool w = new Wool(this.GoalTeam.getColor());
 		//Check for wool
+		
 		for (ItemStack m : p.getPlayer().getInventory()) {
 			
 			
-			
 			//If item in inventory is wool
-			if (m != null && m.equals(Material.WOOL))
+			if (m != null && m.getType().equals(Material.WOOL))
 			{
-				//Check to see if it is my own team color
-				if (!m.equals(w.toItemStack())) {
-					p.getPlayer().getInventory().remove(m);
-					return true;
+				
+				System.out.println("Got some wool");
+				
+				for (CTFTeam t: ((NoEditTeam)this.GoalTeam).session.getTeams()){
+					if (t.getColor().getWoolData() == m.getData().getData()){
+						t.resetFlag();
+					}
 				}
-				else {
-					this.GoalTeam.resetFlag();
-					p.getPlayer().getInventory().remove(m);
-				}
+				
+				p.getPlayer().getInventory().remove(m);
+				return true;
 			}
 		}
 		return false;

@@ -35,13 +35,16 @@ public class NoEditTeam implements CTFTeam {
 	private DyeColor teamColor;
 	private Score teamScore;
 	
+	public NoEditSession session;
+	
 	//Constructors
 	
 	/**
 	 * This constructor allows for specification of the Team name
 	 * @param TeamName
 	 */
-	public NoEditTeam(String TeamName, Score score) {
+	public NoEditTeam(NoEditSession session, String TeamName, Score score) {
+		this.session = session;
 		setTeamName(TeamName);
 		teamScore = score;
 		teamPlayers = new LinkedList<TeamPlayer>();
@@ -58,7 +61,8 @@ public class NoEditTeam implements CTFTeam {
 	 * @param TeamGoal The Goal Region of the team
 	 * @param SpawnLocation The spawn location of the team players
 	 */
-	public NoEditTeam(String TeamName, Score teamScore, List<TeamPlayer> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
+	public NoEditTeam(NoEditSession session, String TeamName, Score teamScore, List<TeamPlayer> Players, int score, Goal TeamGoal, List<Location> spawnLocations, List<Location> flagLocations) {
+		this.session = session;
 		setTeamName(TeamName);
 		this.teamScore = teamScore;
 		setTeamPlayers(Players);
@@ -246,7 +250,9 @@ public class NoEditTeam implements CTFTeam {
 		Wool w = new Wool();
 		w.setColor(this.teamColor);
 		if ((flagRespawn) != null){
+			System.out.println("Setting le flag for team " + this.getName() + " with color " + this.teamColor);
 			flagRespawn.getBlock().setType(w.getItemType());
+			flagRespawn.getBlock().setData(w.getData());
 		}
 		
 	}
