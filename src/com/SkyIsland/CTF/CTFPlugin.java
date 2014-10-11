@@ -22,8 +22,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.SkyIsland.CTF.EditGame.EditSession;
 import com.SkyIsland.CTF.NoEditGame.NoEditGoal;
 import com.SkyIsland.CTF.NoEditGame.NoEditSession;
+import com.SkyIsland.CTF.PigGame.PigSession;
 import com.SkyIsland.CTF.Team.CTFTeam;
 import com.SkyIsland.CTF.Team.TeamPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -50,6 +52,9 @@ public class CTFPlugin extends JavaPlugin implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, this);
 		
 		CTFTypes.registerType(NoEditSession.class);
+		CTFTypes.registerType(EditSession.class);
+		CTFTypes.registerType(PigSession.class);
+		
 		
 		//make sure to get all players currently in on reload in our map
 		for (World w : Bukkit.getWorlds()) {
