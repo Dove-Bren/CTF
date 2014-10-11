@@ -10,16 +10,11 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-
-
-
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Wool;
 import org.bukkit.scoreboard.Score;
 
@@ -219,31 +214,6 @@ public class NoEditTeam implements CTFTeam {
 		}
 		return locations.get(r.nextInt(size));
 	}
-	
-	private ItemStack[] generateArmor() {
-		ItemStack[] Armor = new ItemStack[] {};
-		LeatherArmorMeta dyer;
-		Armor[0] = new ItemStack(Material.LEATHER_HELMET);
-		dyer = ((LeatherArmorMeta) Armor[0].getItemMeta());
-		dyer.setColor(this.teamColor.getColor());
-		Armor[0].setItemMeta(dyer);
-		
-		Armor[1] = new ItemStack(Material.LEATHER_CHESTPLATE);
-		dyer = ((LeatherArmorMeta) Armor[1].getItemMeta());
-		dyer.setColor(this.teamColor.getColor());
-		Armor[1].setItemMeta(dyer);
-		
-		Armor[2] = new ItemStack(Material.LEATHER_LEGGINGS);
-		dyer = ((LeatherArmorMeta) Armor[2].getItemMeta());
-		dyer.setColor(this.teamColor.getColor());
-		Armor[2].setItemMeta(dyer);
-		
-		Armor[3] = new ItemStack(Material.LEATHER_BOOTS);
-		dyer = ((LeatherArmorMeta) Armor[3].getItemMeta());
-		dyer.setColor(this.teamColor.getColor());
-		Armor[3].setItemMeta(dyer);
-		return Armor;
-	}
 
 	/**
 	 * This method handles a respawn event by randomly choosing a respawn location in the team base
@@ -252,6 +222,7 @@ public class NoEditTeam implements CTFTeam {
 	@Override
 	@EventHandler
 	public void handleTeamPlayerRespawn(PlayerRespawnEvent e) {
+		
 		if(!inTeam(CTFPlugin.getTeamPlayer(e.getPlayer()))) {
 			return;
 		}
@@ -259,17 +230,47 @@ public class NoEditTeam implements CTFTeam {
 		System.out.println("Played respawned");
 		
 		e.setRespawnLocation(randomLocation(this.spawnLocations));
-		
-		//e.getPlayer().getInventory().setArmorContents(generateArmor());
-		//e.getPlayer().getInventory().setItemInHand(new ItemStack(Material.STONE_SWORD));
-		
+				
 		//Reset inventory
 		TeamPlayer tp = CTFPlugin.getTeamPlayer(e.getPlayer());
 		CTFTeam team = tp.getTeam();
 		if (team.getInventory() != null){
 			for (ItemStack i: team.getInventory()){
 				if (i != null){
-					tp.getPlayer().getInventory().addItem(i.clone());
+					switch(i.getType()){
+					case LEATHER_BOOTS:
+					case IRON_BOOTS:
+					case GOLD_BOOTS:
+					case DIAMOND_BOOTS:
+						tp.getPlayer().getInventory().setBoots(i.clone());
+						break;
+					case LEATHER_HELMET:
+					case IRON_HELMET:
+					case GOLD_HELMET:
+					case DIAMOND_HELMET:
+						tp.getPlayer().getInventory().setHelmet(i.clone());
+						break;
+					case LEATHER_CHESTPLATE:
+					case IRON_CHESTPLATE:
+					case GOLD_CHESTPLATE:
+					case DIAMOND_CHESTPLATE:
+						tp.getPlayer().getInventory().setChestplate(i.clone());
+						break;
+					case LEATHER_LEGGINGS:
+					case IRON_LEGGINGS:
+					case GOLD_LEGGINGS:
+					case DIAMOND_LEGGINGS:
+						tp.getPlayer().getInventory().setLeggings(i.clone());
+						break;
+					case WOOD_SWORD:
+					case IRON_SWORD:
+					case GOLD_SWORD:
+					case DIAMOND_SWORD:
+						tp.getPlayer().getInventory().setItemInHand(i.clone());
+						break;
+					default:
+						tp.getPlayer().getInventory().addItem(i.clone());
+					}
 				}
 			}
 		}

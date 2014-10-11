@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class TeamPlayer {
 	
@@ -85,12 +86,47 @@ public class TeamPlayer {
 		}
 		
 		player.teleport(spawnLocs.get(  rand.nextInt(spawnLocs.size())));
-		Inventory playerInventory = player.getInventory();
+		PlayerInventory playerInventory = player.getInventory();
 		playerInventory.clear();
 		if (team.getInventory() != null){
 			for (ItemStack i: team.getInventory()){
 				if (i != null){
-					playerInventory.addItem(i.clone());
+					
+					switch(i.getType()){
+					case LEATHER_BOOTS:
+					case IRON_BOOTS:
+					case GOLD_BOOTS:
+					case DIAMOND_BOOTS:
+						playerInventory.setBoots(i.clone());
+						break;
+					case LEATHER_HELMET:
+					case IRON_HELMET:
+					case GOLD_HELMET:
+					case DIAMOND_HELMET:
+						playerInventory.setHelmet(i.clone());
+						break;
+					case LEATHER_CHESTPLATE:
+					case IRON_CHESTPLATE:
+					case GOLD_CHESTPLATE:
+					case DIAMOND_CHESTPLATE:
+						playerInventory.setChestplate(i.clone());
+						break;
+					case LEATHER_LEGGINGS:
+					case IRON_LEGGINGS:
+					case GOLD_LEGGINGS:
+					case DIAMOND_LEGGINGS:
+						playerInventory.setLeggings(i.clone());
+						break;
+					case WOOD_SWORD:
+					case IRON_SWORD:
+					case GOLD_SWORD:
+					case DIAMOND_SWORD:
+						playerInventory.setItemInHand(i.clone());
+						break;
+					default:
+						playerInventory.addItem(i.clone());
+					}
+					
 				}
 			}
 		}
