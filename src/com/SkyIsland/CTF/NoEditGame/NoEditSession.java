@@ -200,6 +200,10 @@ public class NoEditSession implements CTFSession, Listener {
 			}
 		}
 		
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
+			event.setCancelled(true);
+		}
+		
 		event.setCancelled(true);
 	}
 	
