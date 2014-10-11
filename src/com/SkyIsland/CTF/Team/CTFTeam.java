@@ -4,9 +4,11 @@ import java.util.List;
 
 
 
+
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
@@ -17,7 +19,7 @@ import org.bukkit.inventory.Inventory;
  * @author William
  *
  */
-public interface CTFTeam {
+public interface CTFTeam extends Listener{
 	
 	
 	//methods for lists of flagLocations

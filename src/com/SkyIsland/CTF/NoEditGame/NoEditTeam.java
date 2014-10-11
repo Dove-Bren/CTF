@@ -1,9 +1,11 @@
 package com.SkyIsland.CTF.NoEditGame;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +14,7 @@ import org.bukkit.Material;
 
 
 
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
@@ -35,7 +38,7 @@ public class NoEditTeam implements CTFTeam {
 	private Goal TeamGoal;
 	private DyeColor teamColor;
 	private Score teamScore;
-	
+	private static Random rand = new Random();
 	public NoEditSession session;
 	private Inventory inventory;
 	//Constructors
@@ -53,6 +56,7 @@ public class NoEditTeam implements CTFTeam {
 		setgoal(null);
 		setSpawnLocations(new LinkedList<Location>());
 		setFlagLocations(new LinkedList<Location>());
+		Bukkit.getPluginManager().registerEvents(this, CTFPlugin.plugin);
 	}
 	
 	/**
@@ -170,27 +174,35 @@ public class NoEditTeam implements CTFTeam {
 	 * This method handles a team death event by dropping all flags they may carry and deleting their inventory
 	 */
 	@Override
+	@EventHandler
 	public void handleTeamPlayerDeath(PlayerDeathEvent e) {
 		if (inTeam( CTFPlugin.getTeamPlayer(e.getEntity())  )) {
-			for (ItemStack i : e.getEntity().getInventory()) {
-				if (i.equals(Material.WOOL)) {
-					//DROP ANY FUCKING WOOL
-					e.getEntity().getWorld().dropItem(e.getEntity().getLocation(), i);
+			
+			System.out.println("Played died");
+			
+			//set the respawn point
+			e.getEntity().setBedSpawnLocation(spawnLocations.get(rand.nextInt(spawnLocations.size())));
+			
+			
+			for (Iterator<ItemStack> i = e.getDrops().iterator(); i.hasNext();) {
+				ItemStack item = i.next();
+				
+				if (item != null){
+					if (item.getType().equals(Material.WOOL)) {
+						//DROP ANY FUCKING WOOL
+						System.out.println("PLAYER WAS HOLDING WOOL");
+					}
+					else{
+						i.remove();
+					}
 				}
+					
+					
 			}
+			
 			//Remove inventory
 			e.getEntity().getInventory().clear();
 			
-			//Reset inventory
-			TeamPlayer tp = CTFPlugin.getTeamPlayer(e.getEntity());
-			CTFTeam team = tp.getTeam();
-			if (team.getInventory() != null){
-				for (ItemStack i: team.getInventory()){
-					if (i != null){
-						tp.getPlayer().getInventory().addItem(i.clone());
-					}
-				}
-			}
 		}
 	}
 	
@@ -238,12 +250,29 @@ public class NoEditTeam implements CTFTeam {
 	 * @param e The player respawn event
 	 */
 	@Override
+	@EventHandler
 	public void handleTeamPlayerRespawn(PlayerRespawnEvent e) {
-		if(inTeam(   CTFPlugin.getTeamPlayer(e.getPlayer())  )) {
-			e.setRespawnLocation(randomLocation(this.spawnLocations));
+		if(!inTeam(CTFPlugin.getTeamPlayer(e.getPlayer()))) {
+			return;
 		}
-		e.getPlayer().getInventory().setArmorContents(generateArmor());
-		e.getPlayer().getInventory().setItemInHand(new ItemStack(Material.STONE_SWORD));
+		
+		System.out.println("Played respawned");
+		
+		e.setRespawnLocation(randomLocation(this.spawnLocations));
+		
+		//e.getPlayer().getInventory().setArmorContents(generateArmor());
+		//e.getPlayer().getInventory().setItemInHand(new ItemStack(Material.STONE_SWORD));
+		
+		//Reset inventory
+		TeamPlayer tp = CTFPlugin.getTeamPlayer(e.getPlayer());
+		CTFTeam team = tp.getTeam();
+		if (team.getInventory() != null){
+			for (ItemStack i: team.getInventory()){
+				if (i != null){
+					tp.getPlayer().getInventory().addItem(i.clone());
+				}
+			}
+		}
 	}
 	
 	@Override
